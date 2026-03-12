@@ -1,8 +1,9 @@
-import type { ThinkingBlock, ToolCall } from "../../types";
+import type { ThinkingBlock as ThinkingBlockType, ToolCall } from "../../types";
+import ThinkingBlock from "./ThinkingBlock";
 
 interface AssistantMessageProps {
   text?: string,
-  thinkingBlocks: ThinkingBlock[],
+  thinkingBlocks: ThinkingBlockType[],
   toolCalls: ToolCall[]
 }
 
@@ -11,7 +12,7 @@ export default function AssistantMessage({ text, thinkingBlocks, toolCalls } : A
     <div>
       <p>{text}</p>      
       {thinkingBlocks.map((thinkingBlock, i) => (
-        <p key={i}>Thinking block</p>
+        <ThinkingBlock key={i} text={thinkingBlock.text}/>
       ))}
       {toolCalls.map((toolCall, i) => (
         <p key={i}>{toolCall.type}</p>
