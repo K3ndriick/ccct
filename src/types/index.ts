@@ -1,10 +1,36 @@
-export type ToolCall =
-  | { type: 'read';  filePath: string }
-  | { type: 'edit';  filePath: string; diff: string }
-  | { type: 'bash';  command: string }
-  | { type: 'glob';  pattern: string }
-	| { type: 'write'; filePath: string;}
+export type ThinkingBlock = {
+	text: string
+}
 
 export type ToolResult = {
-	status: "success" | "error"
+	status: "success" | "error",
+	result: string
+}
+
+type ToolCallBase = {
+  result: ToolResult
+}
+
+export type ToolCall =
+  | ToolCallBase & { type: 'read';  filePath: string }
+  | ToolCallBase & { type: 'edit';  filePath: string; diff: string }
+  | ToolCallBase & { type: 'bash';  command: string }
+  | ToolCallBase & { type: 'glob';  pattern: string }
+	| ToolCallBase & { type: 'write'; filePath: string }
+
+export type Message = 
+	| { role: 'user'; text: string }
+	| { role: 'assistant'; text?: string; thinkingBlocks: ThinkingBlock[]; toolCalls: ToolCall[]}
+
+export type Conversation = {
+	id: string,
+	projectName: string,
+	projectSlug: string,
+	projectDate: string,
+	messages: Message[]
+}
+
+export type Project = {
+	name: string,
+	conversations: Conversation[]
 }
