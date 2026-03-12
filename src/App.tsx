@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { projects } from "./lib/mockData";
+import Sidebar from "./components/sidebar/Sidebar";
 
 function App() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -8,11 +9,13 @@ function App() {
   .flatMap(project => project.conversations)
   .find(convo => convo.id === selectedConversationId);
 
+  // console.log(selectedConversationId);
+
   return(
     <>
       <div className="flex h-full">
         <div className="w-[240px]">
-          <p>Sidebar</p>
+          <Sidebar projects={projects} selectedConversationId={selectedConversationId} onSelectConversation={setSelectedConversationId}/>
         </div>
         <div className="flex-1">
           <p>Convo view</p>
