@@ -15,12 +15,31 @@ export const projects: Project[] = [
           },
           { role: 'assistant',
             text: "user wants me to read through this repo...",
-            thinkingBlocks: [],
-            toolCalls: []
+            thinkingBlocks: [
+              { text: "The user wants me to read the repo. Let me start with the main files..." }
+            ],
+            toolCalls: [
+              {
+                type: 'read',
+                filePath: 'src/weather.ts',
+                result: {
+                  status: 'success',
+                  result: 'File read successfully'
+                }
+              },
+              {
+                type: 'read',
+                filePath: 'src/weather.ts',
+                result: {
+                  status: 'error',
+                  result: 'Unable to read file'
+                }
+              },
+            ]
           }
         ]
       }
-    ]  
+    ]
   }
   
 ]
