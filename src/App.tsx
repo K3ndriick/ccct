@@ -2,6 +2,7 @@ import { useState } from "react";
 import { projects } from "./lib/mockData";
 import Sidebar from "./components/sidebar/Sidebar";
 import ConversationView from "./components/conversation/ConversationView";
+import OutputPanel from "./components/output/OutputPanel";
 
 function App() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -19,11 +20,10 @@ function App() {
           <Sidebar projects={projects} selectedConversationId={selectedConversationId} onSelectConversation={setSelectedConversationId}/>
         </div>
         <div className="flex-1">
-          <p>Convo view</p>
           <ConversationView conversation={selectedConversation ?? null}/>
         </div>
         <div className="w-[320px]">
-          <p>Output panel</p>
+          <OutputPanel conversation={selectedConversation ?? null}/>
         </div>
       </div>
     </>
