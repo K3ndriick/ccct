@@ -8,9 +8,9 @@ interface ConversationViewProps {
 
 export default function ConversationView({ conversation } : ConversationViewProps) {
   return(
-    <div>
+    <div className="h-full p-6">
       {conversation && (
-        <div>
+        <div className="flex flex-col gap-4">
           {conversation.messages.map((message, i) => 
             (message.role === "assistant" 
               ? <AssistantMessage key={i} text={message.text} thinkingBlocks={message.thinkingBlocks} toolCalls={message.toolCalls}/> 

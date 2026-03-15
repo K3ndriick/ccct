@@ -10,7 +10,8 @@ interface AssistantMessageProps {
 
 export default function AssistantMessage({ text, thinkingBlocks, toolCalls } : AssistantMessageProps) {
   return(
-    <div>
+    <div className="border-l-2 border-surface-border pl-4 flex flex-col gap-2">
+      <p className="text-xs text-text-muted mb-1">Claude</p>
       <p>{text}</p>      
       {thinkingBlocks.map((thinkingBlock, i) => (
         <ThinkingBlock key={i} text={thinkingBlock.text}/>

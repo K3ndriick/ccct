@@ -15,14 +15,14 @@ function App() {
 
   return(
     <>
-      <div className="flex h-full">
-        <div className="w-[240px]">
+      <div className="flex h-full bg-surface-base">
+        <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col">
           <Sidebar projects={projects} selectedConversationId={selectedConversationId} onSelectConversation={setSelectedConversationId}/>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <ConversationView conversation={selectedConversation ?? null}/>
         </div>
-        <div className="w-[320px]">
+        <div className="w-[320px] bg-surface-raised border-l border-surface-border">
           <OutputPanel conversation={selectedConversation ?? null}/>
         </div>
       </div>
