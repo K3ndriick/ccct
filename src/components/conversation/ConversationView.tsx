@@ -8,7 +8,7 @@ interface ConversationViewProps {
 
 export default function ConversationView({ conversation } : ConversationViewProps) {
   return(
-    <div className="h-full p-6">
+    <div className="h-full p-6 overflow-y-auto">
       {conversation && (
         <div className="flex flex-col gap-4">
           {conversation.messages.map((message, i) => 
@@ -20,7 +20,9 @@ export default function ConversationView({ conversation } : ConversationViewProp
         </div>
       )}
       {!conversation && (
-        <p>Select a Conversation</p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-sm text-text-muted">Select a conversation</p>
+        </div>
       )}
     </div>
   )
