@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ToolCall } from "../../types";
 import { ChevronDown, ChevronRight, FilePen, FilePlus, FileText, Search, Terminal } from 'lucide-react';
+import DiffView from "./DiffView";
 
 interface ToolCallCardProps {
   toolCall: ToolCall
@@ -39,9 +40,12 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
       </div>
 
       {isOpen &&
+      <>
         <p className="px-3 py-2 text-xs font-mono text-text-secondary border-t border-surface-border">
           {toolCall.result.result}
         </p>
+        {toolCall.type === "edit" && <DiffView diff={toolCall.diff}/>}
+      </>
       }
     </div>
   )
