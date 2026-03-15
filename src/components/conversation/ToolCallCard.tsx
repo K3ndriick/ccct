@@ -1,13 +1,23 @@
 import { useState } from "react";
 import type { ToolCall } from "../../types";
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, FilePen, FilePlus, FileText, Search, Terminal } from 'lucide-react';
 
 interface ToolCallCardProps {
   toolCall: ToolCall
 }
 
+const iconMap = {
+  read: { icon: FileText, color: "#3b82f6" },
+  write: { icon: FilePlus, color: "#22c55e" },
+  edit: { icon: FilePen, color: "#eab308" },
+  bash: { icon: Terminal, color: "#f97316" },
+  glob: { icon: Search, color: "#6b7280" },
+}
+
 export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
   const [isOpen, setIsOpen] = useState(toolCall.result.status === 'error');
+  const { icon: Icon, color } = iconMap[toolCall.type];
+
 
   return(
     <div className="bg-surface-raised border border-surface-border rounded-md overflow-hidden">
@@ -16,6 +26,7 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
         className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm text-text-secondary"
       >
         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        <Icon size={14} color={color}/>
         {toolCall.type}
 
         {(toolCall.type === "read" || toolCall.type === "edit" || toolCall.type === "write") && 
