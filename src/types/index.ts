@@ -20,7 +20,7 @@ export type ToolCall =
 
 export type Message = 
 	| { role: 'user'; text: string }
-	| { role: 'assistant'; text?: string; thinkingBlocks: ThinkingBlock[]; toolCalls: ToolCall[]}
+	| { role: 'assistant'; text?: string; thinkingBlocks: ThinkingBlock[]; toolCalls: ToolCall[] }
 
 export type Conversation = {
 	id: string,
