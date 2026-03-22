@@ -44,7 +44,7 @@ export type RawRecord = {
   type: string,
 	message?: {
 		role: "user" | "assistant",
-		content: string | ContentBlock[],
+		content: ContentBlock[],
 		model?: string,
 		id?: string,
 		stop_reason?: string,
@@ -60,16 +60,16 @@ export type RawRecord = {
     name: string,
     input: Record<string, unknown>
   },
-  toolUseResult?: {
-    tool_use_id: string,
-    content: string,
-    stderr?: string,
-    is_error?: boolean
-  },
+  toolUseResult?: string | Record<string, unknown>,
+  sourceToolAssistantUUID?: string
   isMeta?: boolean,
   isSidechain?: boolean,
 	summary?: string,
-	cwd?: string
+  slug?: string,
+  gitBranch?: string,
+  version?: string,
+  requestId?: string,
+  cwd?: string   
 }
 
 export type ParsedConversation = {
@@ -85,3 +85,4 @@ export type ContentBlock =
   | { type: "text";     text: string }
   | { type: "thinking"; thinking: string }
   | { type: "tool_use"; id: string; name: string; input: Record<string, unknown> }
+  | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean }
