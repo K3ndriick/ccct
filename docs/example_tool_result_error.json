@@ -1,0 +1,26 @@
+{
+  "_note": "Tool result record. type is 'user', not a distinct type. Links back to the tool_use block via tool_use_id. is_error:true means the tool failed.",
+  "parentUuid": "0e0c2fb4-af98-4d60-b861-2e17fb987e8a",
+  "isSidechain": false,
+  "userType": "external",
+  "cwd": "c:\\Users\\kenjc\\projects\\new\\storefront",
+  "sessionId": "840bf407-03a7-4171-ab5f-2be5ba01dab4",
+  "version": "2.1.45",
+  "gitBranch": "prod",
+  "type": "user",
+  "message": {
+    "role": "user",
+    "content": [
+      {
+        "type": "tool_result",
+        "tool_use_id": "toolu_01CDxGv4s3prSYZuaNh7Sq3m",
+        "content": "Exit code 2",
+        "is_error": true
+      }
+    ]
+  },
+  "uuid": "f6271433-bca0-4a46-82c2-a26cb98c43c0",
+  "timestamp": "2026-03-03T15:32:34.880Z",
+  "toolUseResult": "Error: Exit code 2",
+  "sourceToolAssistantUUID": "0e0c2fb4-af98-4d60-b861-2e17fb987e8a"
+}

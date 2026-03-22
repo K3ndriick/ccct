@@ -1,0 +1,27 @@
+{
+  "_note": "User-rejected tool call. Structurally identical to a tool error (same is_error:true pattern). The content string is Claude Code's standard rejection message, not an actual tool output.",
+  "parentUuid": "41d7d62c-ff7b-43d1-b178-960c1798e978",
+  "isSidechain": false,
+  "userType": "external",
+  "cwd": "c:\\Users\\kenjc\\projects\\new\\storefront",
+  "sessionId": "840bf407-03a7-4171-ab5f-2be5ba01dab4",
+  "version": "2.1.45",
+  "gitBranch": "prod",
+  "slug": "memoized-discovering-seal",
+  "type": "user",
+  "message": {
+    "role": "user",
+    "content": [
+      {
+        "type": "tool_result",
+        "tool_use_id": "toolu_01BrwxJaWYtAbyMvAb23EXfp",
+        "content": "The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  no what is this command",
+        "is_error": true
+      }
+    ]
+  },
+  "uuid": "62bcf058-5289-417e-8732-6e25abce98c3",
+  "timestamp": "2026-03-03T15:32:55.943Z",
+  "toolUseResult": "Error: The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  no what is this command",
+  "sourceToolAssistantUUID": "41d7d62c-ff7b-43d1-b178-960c1798e978"
+}
