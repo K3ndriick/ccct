@@ -75,122 +75,120 @@ export function parseJsonl(raw: string): ParsedConversation {
   filteredRecordsJson.forEach((record) => {
     const messageContent = record.message?.content;
 
-    // assistant records
+    // CASE A: assistant record
     if (record.type === 'assistant') {
       if (Array.isArray(messageContent)) {
-        // create separate block arrays
-        const textBlocks: string[] = [];
-        const thinkingBlocks: ThinkingBlock[] = [];
-        const toolUseBlocks: (ContentBlock & { type: "tool_use"})[] = [];
+        if (record.message?.id !== currentMessageId) {
+          flush();
+
+          currentMessageId = record.message?.id ?? null;
+        }
 
         messageContent.forEach(contentBlock => {
           if (contentBlock.type === "text") {
-            textBlocks.push(contentBlock.text);
+            currentTextBlocks.push(contentBlock.text);
           } else if (contentBlock.type === "thinking") {
-            thinkingBlocks.push({ text: contentBlock.thinking });
+            currentThinkingBlocks.push({ text: contentBlock.thinking });
           } else if (contentBlock.type === "tool_use") {
-            toolUseBlocks.push(contentBlock);
+            currentToolUseBlocks.push(contentBlock);
           }
         });
 
-        // mapping incoming tool calls as we wait for tool call results
-        toolUseBlocks.forEach(block => {
-          pendingToolCalls.set(block.id, block);
-        });
-
-        messages.push({
-          role: 'assistant',
-          text: textBlocks.join("\n") || undefined,
-          thinkingBlocks,
-          toolCalls: []
-        });
       }
     }
 
-    // user records
+    // CASE B: user records
     else if (record.type === "user") {
+      flush(); // ensure any pending assistant turn is emitted first
+
       // grab the contentBlock section
       // we can assume content[0] here because Claude Code streams one block per record into data logs
       // means there will always only be one block in the "content" section of the log structure
       const contentBlock = record.message?.content[0];
 
-      // CASE A: user record where content[0].type === "tool_result"
-      if (contentBlock?.type === "tool_result") {
-        const pendingCallToMatch = pendingToolCalls.get(contentBlock.tool_use_id);
+      // CASE B1: user record where content[0].type === "text"
+      if (contentBlock?.type === "text") {
+        if (Array.isArray(messageContent)) {
+          const text = messageContent
+            .filter((block): block is { type: "text"; text: string } => block.type === "text" && !block.text.startsWith("<ide_"))
+            .map(block => block.text)
+            .join("\n");
 
-        if (!pendingCallToMatch) return;
+          // true if there's actual content after stripping whitespace
+          // false if the string is "" or "   " (only whitespace)
+          if (text.trim()) {
+            messages.push({ role: "user", text })
+          };
+        }
+      }
+
+
+      // CASE B2: user record where content[0].type === "tool_result"
+      else if (contentBlock?.type === "tool_result") {
+        // retrieve { block, messageIndex } object from lookup map via tool_use_id
+        const toolCallToMatch = pendingToolCalls.get(contentBlock.tool_use_id);
+
+        if (!toolCallToMatch) return;
 
         const toolResult: ToolResult = {
           status: contentBlock.is_error ? 'error' : 'success',
           result: contentBlock.content
         }
 
-
-        
+        const targetMessage = messages[toolCallToMatch.messageIndex];
+        if (targetMessage.role !== "assistant") return;
 
         // switch case for tool call types
-        // switch (pendingCallToMatch.name) {
-        //   case "Read":
-        //     lastMessage.toolCalls.push({
-        //       type: 'read',
-        //       filePath: pendingCallToMatch.input.file_path as string,
-        //       result: toolResult
-        //     })
-        //     break;
+        switch (toolCallToMatch.block.name) {
+          case "Read":
+            targetMessage.toolCalls.push({
+              type: 'read',
+              filePath: toolCallToMatch.block.input.file_path as string,
+              result: toolResult
+            })
+            break;
 
-        //   case "Edit":
-        //     lastMessage.toolCalls.push({
-        //       type: 'edit',
-        //       filePath: pendingCallToMatch.input.file_path as string,
-        //       result: toolResult,
-        //       diff: pendingCallToMatch.input.diff as string
-        //     })
-        //     break;
+          case "Write":
+            targetMessage.toolCalls.push({
+              type: "write",
+              filePath: toolCallToMatch.block.input.file_path as string,
+              result: toolResult,
+            });
+            break;
 
-        //   case "Bash":
-        //     lastMessage.toolCalls.push({
-        //       type: 'bash',
-        //       result: toolResult,
-        //       command: pendingCallToMatch.input.command as string
-        //     })
-        //     break;
+          case "Edit":
+            targetMessage.toolCalls.push({
+              type: 'edit',
+              filePath: toolCallToMatch.block.input.file_path as string,
+              result: toolResult,
+              diff: toolCallToMatch.block.input.new_string as string
+            })
+            break;
 
-        //   case "Glob":
-        //     lastMessage.toolCalls.push({
-        //       type: 'glob',
-        //       result: toolResult,
-        //       pattern: pendingCallToMatch.input.pattern as string
-        //     })
-        //     break;
+          case "Bash":
+            targetMessage.toolCalls.push({
+              type: 'bash',
+              result: toolResult,
+              command: toolCallToMatch.block.input.command as string
+            })
+            break;
 
-        //   default:
-        //     break;
-        // }
+          case "Glob":
+            targetMessage.toolCalls.push({
+              type: 'glob',
+              result: toolResult,
+              pattern: toolCallToMatch.block.input.pattern as string
+            })
+            break;
 
+          default:
+            break;
+        }
       }
-        
-
-
-
-
-
-      
-
-      // else if (Array.isArray(messageContent)) {
-      //   const text = messageContent
-      //     .filter(block => block.type === "text")
-      //     .map(block => block.text)
-      //     .join("\n");
-
-      //   messages.push({ role: "user", text });
-      // }
-
     }
   })
+  flush();
 
-
-
-  
   return {
     sessionId,
     cwd,
