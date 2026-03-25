@@ -41,7 +41,7 @@ export type RawRecord = {
   parentUuid: string | null,
   sessionId: string,
   timestamp: string,
-  type: string,
+  type: string, // "user", "assistant", "queue-operation", "progress"
 	message?: {
 		role: "user" | "assistant",
 		content: ContentBlock[],
