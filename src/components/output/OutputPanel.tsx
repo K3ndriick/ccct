@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
-import type { Conversation } from "../../types";
+import type { ParsedConversation } from "../../types";
+import { generateContinuationPrompt } from "../../lib/anthropic";
 
 const MODELS = [
   "claude-opus-4-6",
@@ -9,20 +10,37 @@ const MODELS = [
 ];
 
 interface OutputPanelProps {
-  conversation: Conversation | null
+  conversation: ParsedConversation | null
 }
 
 export default function OutputPanel({ conversation } : OutputPanelProps) {
-  const fakeString = "<context_transfer>\n  <session_summary>...</session_summary>\n  <files_modified>...</files_modified>\n  <decisions_made>...</decisions_made>\n  <current_state>...</current_state>\n  <next_steps>...</next_steps>\n</context_transfer>";
   const [selectedModel, setSelectedModel] = useState(MODELS[1]);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleCopy() {
     if (!generatedPrompt) return;
     navigator.clipboard.writeText(generatedPrompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleGenerate() {
+    if (!conversation) return; 
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await generateContinuationPrompt(conversation, selectedModel);
+      setGeneratedPrompt(result);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unknown error");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return(
@@ -40,14 +58,17 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
       </select>
 
       <button
-        disabled={!conversation}
-        onClick={() => setGeneratedPrompt(fakeString)}
+        disabled={!conversation || isLoading}
+        onClick={() => handleGenerate()}
         className="w-full py-2 rounded-md text-sm font-medium transition-colors
           disabled:bg-surface-raised disabled:text-text-muted disabled:cursor-not-allowed
           enabled:bg-accent enabled:text-white enabled:hover:bg-accent-dim enabled:cursor-pointer"
       >
-        Generate Prompt
+        {isLoading ? "Generating..." : "Generate Prompt"}
       </button>
+      {error && (
+        <p className="text-xs text-status-error">{error}</p>
+      )}
 
       {generatedPrompt && (
         <div className="flex-1 flex flex-col gap-2 min-h-0">
