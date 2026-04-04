@@ -86,3 +86,15 @@ export type ContentBlock =
   | { type: "thinking"; thinking: string }
   | { type: "tool_use"; id: string; name: string; input: Record<string, unknown> }
   | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean }
+
+// types for reading from disk
+export type ConversationEntry = {
+  path: string,
+  filename: string
+}
+
+export type ProjectEntry = {
+  name: string,
+  path: string,
+  files: ConversationEntry[]
+}
