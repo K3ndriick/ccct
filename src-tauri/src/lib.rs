@@ -25,11 +25,13 @@ fn read_file(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn read_claude_dir() -> Result<Vec<ProjectEntry>, String> {
+fn read_claude_dir(claude_dir: String) -> Result<Vec<ProjectEntry>, String> {
+  let projects_path = format!("{}\\projects", claude_dir);
+
   // mutable arr of projects
   let mut projects: Vec<ProjectEntry> = Vec::new();
 
-  for entry in std::fs::read_dir("TEMPORARY HARDCODED STRING PLACEHOLDER").map_err(|e| e.to_string())? {
+  for entry in std::fs::read_dir(projects_path).map_err(|e| e.to_string())? {
     // entry is now one item in the directory
     let entry = entry.map_err(|e| e.to_string())?;
     // mutable arr of files
