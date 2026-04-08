@@ -3,7 +3,7 @@ import Sidebar from "./components/sidebar/Sidebar";
 import ConversationView from "./components/conversation/ConversationView";
 import OutputPanel from "./components/output/OutputPanel";
 import TopBar from "./components/TopBar";
-import type { ParsedConversation, ProjectEntry } from "./types";
+import type { ParsedConversation, ProjectEntry, Settings } from "./types";
 import { invoke } from "@tauri-apps/api/core";
 import { parseJsonl } from "./lib/parser";
 
@@ -24,7 +24,9 @@ function App() {
       setIsLoadingDir(true);
       setDirError(null);
 
-      const entries = await invoke<ProjectEntry[]>("read_claude_dir");
+      const settings = await invoke<Settings>("get_settings");
+
+      const entries = await invoke<ProjectEntry[]>("read_claude_dir", { claude_dir: settings.claudeDir });
       setProjectEntries(entries);
     } catch (error) {
       setDirError(error instanceof Error ? error.message : String(error));
