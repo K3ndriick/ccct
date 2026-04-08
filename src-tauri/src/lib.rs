@@ -1,28 +1,3 @@
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-  tauri::Builder::default()
-    .setup(|app| {
-      if cfg!(debug_assertions) {
-        app.handle().plugin(
-          tauri_plugin_log::Builder::default()
-            .level(log::LevelFilter::Info)
-            .build(),
-        )?;
-      }
-      Ok(())
-    })
-    // mapping rust functions for tauri
-    .invoke_handler(tauri::generate_handler![read_file, read_claude_dir])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
-}
-
-
-#[tauri::command]
-fn read_file(path: String) -> Result<String, String> {
-  std::fs::read_to_string(&path).map_err(|e| e.to_string())
-}
-
 #[derive(serde::Serialize)]
 struct ConversationEntry {
   path: String,
@@ -34,6 +9,19 @@ struct ProjectEntry {
   name: String,
   path: String,
   files: Vec<ConversationEntry>
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct Settings {
+  claude_dir: String,
+  auto_index: bool
+}
+
+
+
+#[tauri::command]
+fn read_file(path: String) -> Result<String, String> {
+  std::fs::read_to_string(&path).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -68,7 +56,8 @@ fn read_claude_dir() -> Result<Vec<ProjectEntry>, String> {
     }
 
     let raw = folder_name.to_string_lossy().to_string();
-    let display_name = raw.split('-').last().unwrap_or(&raw).to_string();
+    let reconstructed = raw.replace('-', "\\");
+    let display_name = reconstructed.split("\\").last().unwrap_or(&raw).to_string();
 
     projects.push(ProjectEntry {
       name: display_name,
@@ -78,4 +67,95 @@ fn read_claude_dir() -> Result<Vec<ProjectEntry>, String> {
   }
 
   Ok(projects)
+}
+
+#[tauri::command]
+fn get_api_key() -> Result<String, String> {
+  let keyring_entry = keyring::Entry::new("ccct", "anthropic_api_key").map_err(|e| e.to_string())?;
+  let api_key = keyring_entry.get_password().map_err(|e| e.to_string())?;
+
+  return Ok(api_key)
+}
+
+#[tauri::command]
+fn set_api_key(key: String) -> Result<(), String> {
+  let keyring_entry = keyring::Entry::new("ccct", "anthropic_api_key").map_err(|e| e.to_string())?;
+  keyring_entry.set_password(&key).map_err(|e| e.to_string())?;
+
+  return Ok(())
+}
+
+#[tauri::command]
+fn get_settings() -> Result<Settings, String> {
+  // build the path for settings file
+  let app_data = std::env::var("APPDATA").map_err(|e|e.to_string())?;
+  let settings_path = format!("{}\\ccct\\settings.json", app_data);
+
+  // building directory
+  let settings_dir =format!("{}\\ccct", app_data);
+  std::fs::create_dir_all(&settings_dir).map_err(|e| e.to_string())?;
+
+  // read file
+  match std::fs::read_to_string(&settings_path) {
+    Ok(content) => {
+      let settings = serde_json::from_str::<Settings>(&content).map_err(|e| e.to_string())?;
+
+      Ok(settings)
+    }
+
+    Err(_) => {
+      // doesnt exist
+      let home = std::env::var("USERPROFILE").map_err(|e| e.to_string())?;
+
+      Ok(Settings {
+        claude_dir: format!("{}/.claude", home),
+        auto_index: true
+      })
+    }
+  }
+}
+
+#[tauri::command]
+fn save_settings(settings: Settings) -> Result<(), String> {
+  // build the path for settings file
+  let app_data = std::env::var("APPDATA").map_err(|e|e.to_string())?;
+  let settings_path = format!("{}\\ccct\\settings.json", app_data);
+
+  // building directory
+  let settings_dir =format!("{}\\ccct", app_data);
+  std::fs::create_dir_all(&settings_dir).map_err(|e| e.to_string())?;
+
+  // convert settings struct into json string & save it
+  let json_string = serde_json::to_string_pretty(&settings).map_err(|e| e.to_string())?;
+  std::fs::write(&settings_path, json_string).map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
+
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+  tauri::Builder::default()
+    .setup(|app| {
+      if cfg!(debug_assertions) {
+        app.handle().plugin(
+          tauri_plugin_log::Builder::default()
+            .level(log::LevelFilter::Info)
+            .build(),
+        )?;
+      }
+      Ok(())
+    })
+    // mapping rust functions for tauri
+    .invoke_handler(tauri::generate_handler![
+      read_file,
+      read_claude_dir,
+      get_api_key,
+      set_api_key,
+      get_settings,
+      save_settings
+    ])
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
 }
