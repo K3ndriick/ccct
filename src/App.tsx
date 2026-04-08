@@ -15,12 +15,24 @@ function App() {
   const [isLoadingDir, setIsLoadingDir] = useState(false);
   const [dirError, setDirError] = useState<string | null>(null);
 
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+
   useEffect(() => {
-    async function load() {
+  async function load() {
+    try {
+      setIsLoadingDir(true);
+      setDirError(null);
+
       const entries = await invoke<ProjectEntry[]>("read_claude_dir");
       setProjectEntries(entries);
+    } catch (error) {
+      setDirError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsLoadingDir(false);
     }
-    load();
+  }
+  load();
   }, []);
 
   useEffect(() => {
@@ -29,12 +41,20 @@ function App() {
     }
 
     async function load() {
-      const raw = await invoke<string>("read_file", { path: selectedConversationPath });
-      const parsed = parseJsonl(raw);
-      setParsedConversation(parsed);
-    }
+      try {
+        setIsLoadingFile(true);
+        setFileError(null);
 
-    load();
+        const raw = await invoke<string>("read_file", { path: selectedConversationPath });
+        const parsed = parseJsonl(raw);
+        setParsedConversation(parsed);
+      } catch (error) {
+        setFileError(error instanceof Error ? error.message : String(error));
+      } finally {
+        setIsLoadingFile(false);
+      }
+    }
+  load();
   }, [selectedConversationPath]);
 
   return (
@@ -43,7 +63,12 @@ function App() {
         <TopBar/>
         <div className="flex flex-1">
           <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col">
-            <Sidebar projects={projectEntries} selectedConversationId={selectedConversationPath} onSelectConversation={setSelectedConversationPath}/>
+            <Sidebar
+              projects={projectEntries}
+              selectedConversationId={selectedConversationPath}
+              onSelectConversation={setSelectedConversationPath}
+              dirError={dirError}
+            />
           </div>
           <div className="flex-1 overflow-y-auto">
             <ConversationView conversation={parsedConversation}/>

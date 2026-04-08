@@ -4,13 +4,18 @@ import type { ProjectEntry } from "../../types";
 interface SidebarProps {
   projects: ProjectEntry[] | null,
   selectedConversationId: string | null,
-  onSelectConversation: (id: string) => void
+  onSelectConversation: (id: string) => void,
+  dirError: string | null
 }
 
-export default function Sidebar({ projects, selectedConversationId, onSelectConversation } : SidebarProps) {
+export default function Sidebar({ projects, selectedConversationId, onSelectConversation, dirError } : SidebarProps) {
 
   if (!projects) {
     return (<p>Loading...</p>)
+  }
+
+  if (dirError) {
+    return (<p>{dirError}</p>)
   }
   
   return (
