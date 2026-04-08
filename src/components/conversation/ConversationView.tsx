@@ -1,9 +1,9 @@
-import type { Conversation } from "../../types";
+import type { ParsedConversation } from "../../types";
 import UserMessage from "./UserMessage";
 import AssistantMessage from "./AssistantMessage";
 
 interface ConversationViewProps {
-  conversation: Conversation | null
+  conversation: ParsedConversation | null
 }
 
 export default function ConversationView({ conversation } : ConversationViewProps) {
