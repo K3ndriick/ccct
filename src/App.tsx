@@ -1,32 +1,55 @@
-import { useState } from "react";
-import { projects } from "./lib/mockData";
+import { useEffect, useState } from "react";
 import Sidebar from "./components/sidebar/Sidebar";
 import ConversationView from "./components/conversation/ConversationView";
 import OutputPanel from "./components/output/OutputPanel";
 import TopBar from "./components/TopBar";
+import type { ParsedConversation, ProjectEntry } from "./types";
+import { invoke } from "@tauri-apps/api/core";
+import { parseJsonl } from "./lib/parser";
 
 function App() {
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [selectedConversationPath, setSelectedConversationPath] = useState<string | null>(null);
+  const [parsedConversation, setParsedConversation] = useState<ParsedConversation | null>(null);
+  const [projectEntries, setProjectEntries] = useState<ProjectEntry[] | null>(null);
 
-  const selectedConversation = projects
-  .flatMap(project => project.conversations)
-  .find(convo => convo.id === selectedConversationId);
+  const [isLoadingDir, setIsLoadingDir] = useState(false);
+  const [dirError, setDirError] = useState<string | null>(null);
 
-  // console.log(selectedConversationId);
+  useEffect(() => {
+    async function load() {
+      const entries = await invoke<ProjectEntry[]>("read_claude_dir");
+      setProjectEntries(entries);
+    }
+    load();
+  }, []);
 
-  return(
+  useEffect(() => {
+    if (!selectedConversationPath) {
+      return;
+    }
+
+    async function load() {
+      const raw = await invoke<string>("read_file", { path: selectedConversationPath });
+      const parsed = parseJsonl(raw);
+      setParsedConversation(parsed);
+    }
+
+    load();
+  }, [selectedConversationPath]);
+
+  return (
     <>
       <div className="flex flex-col h-full bg-surface-base">
         <TopBar/>
         <div className="flex flex-1">
           <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col">
-            <Sidebar projects={projects} selectedConversationId={selectedConversationId} onSelectConversation={setSelectedConversationId}/>
+            <Sidebar projects={projectEntries} selectedConversationId={selectedConversationPath} onSelectConversation={setSelectedConversationPath}/>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <ConversationView conversation={selectedConversation ?? null}/>
+            <ConversationView conversation={parsedConversation}/>
           </div>
           <div className="w-[320px] bg-surface-raised border-l border-surface-border">
-            <OutputPanel conversation={selectedConversation ?? null}/>
+            <OutputPanel conversation={parsedConversation}/>
           </div>
         </div>
         
