@@ -98,3 +98,8 @@ export type ProjectEntry = {
   path: string,
   files: ConversationEntry[]
 }
+
+export type Settings = {
+  claudeDir: string,
+  autoIndex: boolean
+}
