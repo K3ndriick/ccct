@@ -2,7 +2,7 @@ import type { ParsedConversation } from "../../types";
 import UserMessage from "./UserMessage";
 import AssistantMessage from "./AssistantMessage";
 
-interface ConversationViewProps {
+type ConversationViewProps = {
   conversation: ParsedConversation | null
 }
 

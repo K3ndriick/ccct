@@ -2,7 +2,7 @@ import type { ThinkingBlock as ThinkingBlockType, ToolCall } from "../../types";
 import ThinkingBlock from "./ThinkingBlock";
 import ToolCallCard from "./ToolCallCard";
 
-interface AssistantMessageProps {
+type AssistantMessageProps = {
   text?: string,
   thinkingBlocks: ThinkingBlockType[],
   toolCalls: ToolCall[]

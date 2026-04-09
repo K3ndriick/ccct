@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
-interface ThinkingBlockProps {
+type ThinkingBlockProps = {
   text: string
 } 
 

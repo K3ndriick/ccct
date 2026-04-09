@@ -1,7 +1,7 @@
 import { RefreshCcw } from "lucide-react";
 import type { ProjectEntry } from "../../types";
 
-interface SidebarProps {
+type SidebarProps = {
   projects: ProjectEntry[] | null,
   selectedConversationId: string | null,
   onSelectConversation: (id: string) => void,

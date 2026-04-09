@@ -1,4 +1,4 @@
-interface DiffViewProps {
+type DiffViewProps = {
   diff: string
 }
 

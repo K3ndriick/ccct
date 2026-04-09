@@ -9,7 +9,7 @@ const MODELS = [
   "claude-haiku-4-5",
 ];
 
-interface OutputPanelProps {
+type OutputPanelProps = {
   conversation: ParsedConversation | null
 }
 

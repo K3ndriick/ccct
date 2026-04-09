@@ -3,7 +3,7 @@ import type { ToolCall } from "../../types";
 import { ChevronDown, ChevronRight, FilePen, FilePlus, FileText, Search, Terminal } from 'lucide-react';
 import DiffView from "./DiffView";
 
-interface ToolCallCardProps {
+type ToolCallCardProps = {
   toolCall: ToolCall
 }
 
