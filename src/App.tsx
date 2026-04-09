@@ -6,6 +6,7 @@ import TopBar from "./components/TopBar";
 import type { ParsedConversation, ProjectEntry, Settings } from "./types";
 import { invoke } from "@tauri-apps/api/core";
 import { parseJsonl } from "./lib/parser";
+import SettingsPanel from "./components/settings/SettingsPanel";
 
 function App() {
   const [selectedConversationPath, setSelectedConversationPath] = useState<string | null>(null);
@@ -18,24 +19,29 @@ function App() {
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
 
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => {
   async function load() {
-    try {
-      setIsLoadingDir(true);
-      setDirError(null);
+  try {
+    setIsLoadingDir(true);
+    setDirError(null);
 
-      const settings = await invoke<Settings>("get_settings");
+    const settings = await invoke<Settings>("get_settings");
 
-      const entries = await invoke<ProjectEntry[]>("read_claude_dir", { claude_dir: settings.claudeDir });
-      setProjectEntries(entries);
-    } catch (error) {
-      setDirError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setIsLoadingDir(false);
-    }
+    const entries = await invoke<ProjectEntry[]>("read_claude_dir", { claudeDir: settings.claudeDir });
+    setProjectEntries(entries);
+  } catch (error) {
+    console.log("ERROR", error);
+    setDirError(error instanceof Error ? error.message : String(error));
+  } finally {
+    setIsLoadingDir(false);
   }
+}
+
   load();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (!selectedConversationPath) {
@@ -62,7 +68,8 @@ function App() {
   return (
     <>
       <div className="flex flex-col h-full bg-surface-base">
-        <TopBar/>
+        <TopBar onSettingsClick={() => setIsSettingsOpen(true)}/>
+        <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)}/>
         <div className="flex flex-1">
           <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col">
             <Sidebar

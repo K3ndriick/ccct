@@ -12,9 +12,10 @@ struct ProjectEntry {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Settings {
-  claude_dir: String,
-  auto_index: bool
+  claude_dir: String,   // serializes as "claudeDir"
+  auto_index: bool      // serializes as "autoIndex"
 }
 
 
@@ -110,7 +111,7 @@ fn get_settings() -> Result<Settings, String> {
       let home = std::env::var("USERPROFILE").map_err(|e| e.to_string())?;
 
       Ok(Settings {
-        claude_dir: format!("{}/.claude", home),
+        claude_dir: format!("{}\\.claude", home),
         auto_index: true
       })
     }
