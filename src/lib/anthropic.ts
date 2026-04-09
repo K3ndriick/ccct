@@ -4,7 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // generateContinuationPrompt
 // takes a parsed conversation and a model string
 // builds a plain-text payload, sends it to the Anthropic API, returns the generated prompt as a string
-export async function generateContinuationPrompt(parsedConversation: ParsedConversation, model: string): Promise<string> {
+export async function generateContinuationPrompt(parsedConversation: ParsedConversation, model: string, apiKey: string): Promise<string> {
 
   // STEP 1: BUILD PAYLOAD
   // buildPayload serialises the ParsedConversation into a plain-text string
@@ -20,7 +20,7 @@ export async function generateContinuationPrompt(parsedConversation: ParsedConve
   // dangerouslyAllowBrowser is required because this runs inside Tauri's webview, not a server
   // the key is read from .env (dev) - will move to OS keychain in Phase 5
   const client = new Anthropic({
-    apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+    apiKey: apiKey,
     dangerouslyAllowBrowser: true
   });
 

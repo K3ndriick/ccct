@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import type { ParsedConversation } from "../../types";
 import { generateContinuationPrompt } from "../../lib/anthropic";
+import { invoke } from "@tauri-apps/api/core";
 
 const MODELS = [
   "claude-opus-4-6",
@@ -34,10 +35,17 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
     setError(null);
 
     try {
-      const result = await generateContinuationPrompt(conversation, selectedModel);
+      const apiKey = await invoke("get_api_key");
+
+      const result = await generateContinuationPrompt(conversation, selectedModel, String(apiKey));
       setGeneratedPrompt(result);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Unknown error");
+      const msg = String(error);
+      if (msg.includes("password") || msg.includes("credential")) {
+        setError("No API key configured. Open Settings to add your Anthropic API key.");
+      } else {
+        setError(error instanceof Error ? error.message : String(error));
+      }
     } finally {
       setIsLoading(false);
     }
