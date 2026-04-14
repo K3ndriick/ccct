@@ -77,6 +77,9 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
       {error && (
         <p className="text-xs text-status-error">{error}</p>
       )}
+      {!conversation && (
+        <p>No conversation selected</p>
+      )}
 
       {generatedPrompt && (
         <div className="flex-1 flex flex-col gap-2 min-h-0">
