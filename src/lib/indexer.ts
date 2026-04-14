@@ -20,6 +20,12 @@ export type Index = {
   version: number
   entries: IndexEntry[]
   lastBuilt: string     // ISO timestamp
+  skipped: SkippedFile[]
+}
+
+export type SkippedFile = {
+  path: string
+  errorMessage: string
 }
 
 // FULL REBUILD - reads and parses every .jsonl file across all projects.
@@ -33,36 +39,53 @@ export async function buildIndex(projectEntries: ProjectEntry[]): Promise<Index>
       // grab projectEntry's name
       const name = projectEntry.name;
 
-      const entries = await Promise.all(
-        projectEntry.files.map(async (file) => {
-          // then grab the file path
-          const path = file.path;
+      const entriesArr: IndexEntry[] = [];
+      const skippedArr: SkippedFile[] = [];
 
-          const content = await invoke<string>("read_file", { path: file.path });
-          const parsed = parseJsonl(content);
+      for (const file of projectEntry.files) {
+        
+        // then grab the file path
+        const path = file.path;
+        
+        try {
+            const content = await invoke<string>("read_file", { path: file.path });
+            const parsed = parseJsonl(content);
 
-          // then grab the firstMessage
-          const firstUserMessage = parsed.messages.find((message) => message.role === "user");
-          const firstMessage = firstUserMessage?.text?.slice(0, 80) ?? "";
+            // then grab the firstMessage
+            const firstUserMessage = parsed.messages.find((message) => message.role === "user");
+            const firstMessage = firstUserMessage?.text?.slice(0, 80) ?? "";
+            
+            const entry: IndexEntry = {
+              path: path,
+              projectName: name,
+              firstMessage: firstMessage,
+              date: parsed.firstMessageTime,
+              sessionId: parsed.sessionId,
+            }
 
-          return {
-            path: path,
-            projectName: name,
-            firstMessage: firstMessage,
-            date: parsed.firstMessageTime,
-            sessionId: parsed.sessionId,
+            entriesArr.push(entry);
+          } catch (error) {
+            if (error instanceof Error) {
+              const skipped: SkippedFile = {
+                path: path,
+                errorMessage: error instanceof Error ? error.message : String(error)
+              }
+
+              skippedArr.push(skipped);
+            }
           }
-        })
-      );
-      return entries;
+      }
+      return { entriesArr, skippedArr };
     })
   );
-  const allEntries = nested.flat();
+  const allEntries = nested.flatMap(n => n.entriesArr);
+  const allSkipped = nested.flatMap(n => n.skippedArr);
 
   return {
     version: 1,
     entries: allEntries,
-    lastBuilt: new Date().toISOString()
+    lastBuilt: new Date().toISOString(),
+    skipped: allSkipped
   }
 }
 
@@ -92,17 +115,20 @@ export async function updateIndex(existing: Index, projectEntries: ProjectEntry[
     return {
       version: 1,
       entries: existing.entries,
-      lastBuilt: new Date().toISOString()
+      lastBuilt: new Date().toISOString(),
+      skipped: existing.skipped
     }
   }
 
   const indexCompleted = await buildIndex(filtered);
 
   const merged = existing.entries.concat(indexCompleted.entries);
+  const mergedSkipped = existing.skipped.concat(indexCompleted.skipped);
 
   return {
     version: 1,
     entries: merged,
-    lastBuilt: new Date().toISOString()
+    lastBuilt: new Date().toISOString(),
+    skipped: mergedSkipped
   }
 }
