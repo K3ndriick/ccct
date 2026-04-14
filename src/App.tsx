@@ -87,6 +87,23 @@ function App() {
   load();
   }, [selectedConversationPath]);
 
+  async function reIndex() {
+    try {
+      if (!projectEntries) {
+        return;
+      }
+
+      const newIndex = await buildIndex(projectEntries);
+
+      await invoke("write_index", { content: JSON.stringify(newIndex) });
+
+      setIndex(newIndex);
+
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
   return (
     <>
       <div className="flex flex-col h-full bg-surface-base">
@@ -100,6 +117,7 @@ function App() {
               onSelectConversation={setSelectedConversationPath}
               dirError={dirError}
               index={index}
+              onReindex={reIndex}
             />
           </div>
           <div className="flex-1 overflow-y-auto">

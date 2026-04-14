@@ -8,10 +8,11 @@ type SidebarProps = {
   selectedConversationId: string | null,
   onSelectConversation: (id: string) => void,
   dirError: string | null,
-  index: Index | null
+  index: Index | null,
+  onReindex: () => void
 }
 
-export default function Sidebar({ projects, selectedConversationId, onSelectConversation, dirError, index } : SidebarProps) {
+export default function Sidebar({ projects, selectedConversationId, onSelectConversation, dirError, onReindex } : SidebarProps) {
   // Build a path -> IndexEntry lookup map for O(1) access when rendering
   // conversation items. Rebuilds only when index changes, not on every render.
   const indexLookup = useMemo(() => {
@@ -31,6 +32,10 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
 
   if (dirError) {
     return (<p>{dirError}</p>)
+  }
+
+  if (projects.length === 0) {
+    return(<p>No sessions found</p>)
   }
   
   return (
@@ -61,7 +66,10 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
         })}
       </div>
     ))}
-    <button className="mt-auto text-text-muted flex items-center gap-2 border-t border-surface-border px-3 py-3 w-full">
+    <button
+      className="mt-auto text-text-muted flex items-center gap-2 border-t border-surface-border px-3 py-3 w-full"
+      onClick={() => onReindex()}
+    >
       <RefreshCcw size={14}/>
       Re-index
     </button>
