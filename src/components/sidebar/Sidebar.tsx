@@ -1,7 +1,7 @@
-import { RefreshCcw } from "lucide-react";
+import { AlertTriangle, RefreshCcw } from "lucide-react";
 import type { ProjectEntry } from "../../types";
 import type { Index, IndexEntry } from "../../lib/indexer";
-import { useMemo } from "react";
+import { useMemo, useState} from "react";
 
 type SidebarProps = {
   projects: ProjectEntry[] | null,
@@ -12,7 +12,9 @@ type SidebarProps = {
   onReindex: () => void
 }
 
-export default function Sidebar({ projects, selectedConversationId, onSelectConversation, dirError, onReindex } : SidebarProps) {
+export default function Sidebar({ projects, selectedConversationId, onSelectConversation, dirError, index, onReindex } : SidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
   // Build a path -> IndexEntry lookup map for O(1) access when rendering
   // conversation items. Rebuilds only when index changes, not on every render.
   const indexLookup = useMemo(() => {
@@ -66,6 +68,22 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
         })}
       </div>
     ))}
+    <div>
+      {index && index.skipped.length > 0 && (
+        <>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+            <AlertTriangle size={14} />
+            <span>{index.skipped.length} files skipped</span>
+          </div>
+          {isOpen && index.skipped.map((file, i) => (
+            <p key={i} className="text-xs text-text-secondary">
+              {file.path} - {file.errorMessage}
+            </p>
+          ))}
+        </>
+      )}
+    </div>
+
     <button
       className="mt-auto text-text-muted flex items-center gap-2 border-t border-surface-border px-3 py-3 w-full"
       onClick={() => onReindex()}
