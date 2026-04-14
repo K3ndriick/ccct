@@ -135,6 +135,38 @@ fn save_settings(settings: Settings) -> Result<(), String> {
   Ok(())
 }
 
+#[tauri::command]
+fn read_index() -> Result<String, String> {
+  // build the path for index file
+  let app_data = std::env::var("APPDATA").map_err(|e|e.to_string())?;
+  let index_path = format!("{}\\ccct\\index.json", app_data);
+
+  // read file
+  match std::fs::read_to_string(&index_path) {
+    Ok(content) => Ok(content),
+
+    Err(_) => {
+      // doesnt exist
+      Err("Index file not found".to_string())
+    }
+  }
+}
+
+#[tauri::command]
+fn write_index(content: String) -> Result<(), String> {
+  // build the path for index file
+  let app_data = std::env::var("APPDATA").map_err(|e|e.to_string())?;
+  let index_path = format!("{}\\ccct\\index.json", app_data);
+
+  // building directory
+  let settings_dir =format!("{}\\ccct", app_data);
+  std::fs::create_dir_all(&settings_dir).map_err(|e| e.to_string())?;
+
+  std::fs::write(&index_path, content).map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -157,7 +189,9 @@ pub fn run() {
       get_api_key,
       set_api_key,
       get_settings,
-      save_settings
+      save_settings,
+      read_index,
+      write_index
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
