@@ -10,13 +10,14 @@ export default function ThinkingBlock({ text } : ThinkingBlockProps) {
 
   return (
     <div className="bg-accent-subtle border-l-2 border-accent-dim rounded-r px-3 py-2">
-      <div
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-accent-dim"
+        aria-expanded={isOpen}
+        className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-accent-dim w-full text-left"
       >
         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         Thinking
-      </div>
+      </button>
       
       {isOpen &&
         <p className="mt-2 text-sm text-text-secondary italic">

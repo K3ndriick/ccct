@@ -14,9 +14,10 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
 
   return(
     <Card>
-      <div
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm text-text-secondary"
+        aria-expanded={isOpen}
+        className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm text-text-secondary w-full text-left"
       >
         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         <ToolIcon type={toolCall.type} />
@@ -29,7 +30,7 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
         {toolCall.type === "bash" &&
           <span>{toolCall.command}</span>
         }
-      </div>
+      </button>
 
       {isOpen &&
       <>
