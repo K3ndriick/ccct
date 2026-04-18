@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import type { Settings } from "../../types";
+import Button from "../ui/Button";
+import IconButton from "../ui/IconButton";
+import Input from "../ui/Input";
 
 type SettingsPanelProps = {
   isOpen: boolean;
@@ -71,9 +74,9 @@ export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPane
         {/* header */}
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">Settings</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary">
+          <IconButton label="Close settings" onClick={onClose}>
             <X size={16} />
-          </button>
+          </IconButton>
         </div>
 
         {/* Claude Directory */}
@@ -81,12 +84,12 @@ export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPane
           <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">
             Claude Directory
           </label>
-          <input
+          <Input
             type="text"
             value={claudeDir}
             onChange={(e) => setClaudeDir(e.target.value)}
-            className="bg-surface-overlay border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
             placeholder="C:\Users\you\.claude"
+            className="w-full"
           />
         </div>
 
@@ -95,12 +98,13 @@ export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPane
           <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">
             Anthropic API Key
           </label>
-          <input
+          <Input
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="bg-surface-overlay border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent"
             placeholder={hasExistingKey ? "Key saved" : "sk-ant-..."}
+            mono
+            className="w-full"
           />
           {hasExistingKey && (
             <p className="text-xs text-text-muted">Key is stored. Leave blank to keep current key.</p>
@@ -131,19 +135,12 @@ export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPane
 
         {/* buttons */}
         <div className="flex gap-3 mt-auto">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2 rounded-md border border-surface-border text-sm text-text-secondary hover:text-text-primary"
-          >
+          <Button variant="secondary" onClick={onClose} className="flex-1">
             Cancel
-          </button>
-          <button
-            onClick={() => {handleSave()}}
-            disabled={isSaving}
-            className="flex-1 py-2 rounded-md bg-accent text-surface-base text-sm font-semibold hover:bg-accent-dim disabled:opacity-50"
-          >
+          </Button>
+          <Button onClick={handleSave} loading={isSaving} className="flex-1">
             {isSaving ? "Saving..." : "Save"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

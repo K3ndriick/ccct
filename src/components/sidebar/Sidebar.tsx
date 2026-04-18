@@ -1,4 +1,5 @@
 import { AlertTriangle, RefreshCcw } from "lucide-react";
+import Button from "../ui/Button";
 import type { ProjectEntry } from "../../types";
 import type { Index, IndexEntry } from "../../lib/indexer";
 import { useMemo, useState} from "react";
@@ -84,13 +85,14 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
       )}
     </div>
 
-    <button
-      className="mt-auto text-text-muted flex items-center gap-2 border-t border-surface-border px-3 py-3 w-full"
+    <Button
+      variant="ghost"
       onClick={() => onReindex()}
+      className="mt-auto flex items-center gap-2 border-t border-surface-border px-3 py-3 w-full rounded-none"
     >
       <RefreshCcw size={14}/>
       Re-index
-    </button>
+    </Button>
   </div>
   )
 }

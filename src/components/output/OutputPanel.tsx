@@ -3,6 +3,7 @@ import { Copy, Check } from "lucide-react";
 import type { ParsedConversation } from "../../types";
 import { generateContinuationPrompt } from "../../lib/anthropic";
 import { invoke } from "@tauri-apps/api/core";
+import Button from "../ui/Button";
 
 const MODELS = [
   "claude-opus-4-6",
@@ -65,15 +66,14 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
         ))}
       </select>
 
-      <button
-        disabled={!conversation || isLoading}
+      <Button
+        disabled={!conversation}
+        loading={isLoading}
         onClick={() => handleGenerate()}
-        className="w-full py-2 rounded-md text-sm font-medium transition-colors
-          disabled:bg-surface-raised disabled:text-text-muted disabled:cursor-not-allowed
-          enabled:bg-accent enabled:text-white enabled:hover:bg-accent-dim enabled:cursor-pointer"
+        className="w-full"
       >
         {isLoading ? "Generating..." : "Generate Prompt"}
-      </button>
+      </Button>
       {error && (
         <p className="text-xs text-status-error">{error}</p>
       )}
@@ -85,13 +85,10 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
         <div className="flex-1 flex flex-col gap-2 min-h-0">
           <div className="flex items-center justify-between">
             <p className="text-xs text-text-muted">Generated prompt</p>
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors"
-            >
+            <Button variant="ghost" onClick={handleCopy} className="flex items-center gap-1 text-xs">
               {copied ? <Check size={13} /> : <Copy size={13} />}
               {copied ? "Copied" : "Copy"}
-            </button>
+            </Button>
           </div>
           <pre className="flex-1 overflow-auto bg-surface-raised border border-surface-border rounded-md p-3 text-xs font-mono text-text-secondary whitespace-pre-wrap">
             {generatedPrompt}
