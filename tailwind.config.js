@@ -24,6 +24,13 @@ export default {
         'status-error':   '#ef4444',
         'status-warning': '#eab308',
         'status-info':    '#3b82f6',
+        // Tool colors
+        'tool-read':     '#3b82f6',
+        'tool-write':    '#22c55e',
+        'tool-edit':     '#eab308',
+        'tool-bash':     '#f97316',
+        'tool-glob':     '#6b7280',
+        'tool-thinking': '#a855f7',
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
