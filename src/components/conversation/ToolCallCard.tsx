@@ -3,7 +3,7 @@ import type { ToolCall } from "../../types";
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import Card from "../ui/Card";
 import ToolIcon from "./ToolIcon";
-import DiffView from "./DiffView";
+import ToolResultRenderer from "./toolResults";
 
 type ToolCallCardProps = {
   toolCall: ToolCall
@@ -34,10 +34,7 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
 
       <div className={`grid transition-all duration-150 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
         <div className="overflow-hidden">
-          <p className="px-3 py-2 text-xs font-mono text-text-secondary border-t border-surface-border">
-            {toolCall.result.result}
-          </p>
-          {toolCall.type === "edit" && <DiffView oldString={toolCall.oldString} newString={toolCall.newString}/>}
+          <ToolResultRenderer toolCall={toolCall} />
         </div>
       </div>
     </Card>
