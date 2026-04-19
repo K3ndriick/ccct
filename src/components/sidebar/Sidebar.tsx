@@ -1,4 +1,4 @@
-import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { AlertTriangle, RefreshCcw, Loader2, FolderOpen } from "lucide-react";
 import Button from "../ui/Button";
 import type { ProjectEntry } from "../../types";
 import type { Index, IndexEntry } from "../../lib/indexer";
@@ -30,15 +30,32 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
 
 
   if (!projects) {
-    return (<p>Loading...</p>)
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-4">
+        <Loader2 size={24} className="text-text-muted animate-spin" />
+        <p className="text-sm text-text-secondary">Scanning...</p>
+      </div>
+    )
   }
 
   if (dirError) {
-    return (<p>{dirError}</p>)
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-4">
+        <AlertTriangle size={24} className="text-status-error" />
+        <p className="text-sm font-medium text-text-secondary">Directory error</p>
+        <p className="text-xs text-text-muted">{dirError}</p>
+      </div>
+    )
   }
 
   if (projects.length === 0) {
-    return(<p>No sessions found</p>)
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-4">
+        <FolderOpen size={24} className="text-text-muted" />
+        <p className="text-sm font-medium text-text-secondary">No sessions found</p>
+        <p className="text-xs text-text-muted">Check your Claude directory in Settings</p>
+      </div>
+    )
   }
   
   return (
