@@ -59,7 +59,7 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
       <select
         value={selectedModel}
         onChange={(e) => setSelectedModel(e.target.value)}
-        className="w-full bg-surface-raised border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary focus:outline-none"
+        className="w-full bg-surface-raised border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         {MODELS.map((model) => (
           <option key={model} value={model}>{model}</option>

@@ -27,7 +27,7 @@ export default function Button({
   return (
     <button
       disabled={disabled || loading}
-      className={`px-3 py-2 rounded-md text-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
+      className={`px-3 py-2 rounded-md text-sm transition-colors cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${variantClasses[variant]} ${className}`}
       {...props}
     >
       {children}

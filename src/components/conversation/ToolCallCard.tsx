@@ -17,7 +17,7 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm text-text-secondary w-full text-left"
+        className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm text-text-secondary w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md"
       >
         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         <ToolIcon type={toolCall.type} />
@@ -32,14 +32,14 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
         }
       </button>
 
-      {isOpen &&
-      <>
-        <p className="px-3 py-2 text-xs font-mono text-text-secondary border-t border-surface-border">
-          {toolCall.result.result}
-        </p>
-        {toolCall.type === "edit" && <DiffView diff={toolCall.diff}/>}
-      </>
-      }
+      <div className={`grid transition-all duration-150 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
+          <p className="px-3 py-2 text-xs font-mono text-text-secondary border-t border-surface-border">
+            {toolCall.result.result}
+          </p>
+          {toolCall.type === "edit" && <DiffView diff={toolCall.diff}/>}
+        </div>
+      </div>
     </Card>
   )
 }

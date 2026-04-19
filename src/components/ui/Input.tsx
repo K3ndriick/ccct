@@ -7,7 +7,7 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 export default function Input({ mono = false, className = "", ...props }: InputProps) {
   return (
     <input
-      className={`bg-surface-overlay border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent ${mono ? "font-mono" : ""} ${className}`}
+      className={`bg-surface-overlay border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent ${mono ? "font-mono" : ""} ${className}`}
       {...props}
     />
   );

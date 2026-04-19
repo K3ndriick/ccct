@@ -52,10 +52,10 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
           // preview + date if indexed, fall back to raw filename if not
           const indexEntry = indexLookup.get(conversation.path)
           return (
-          <div
+          <button
             key={conversation.filename}
             onClick={() => onSelectConversation(conversation.path)}
-            className={`px-3 py-2 text-sm cursor-pointer hover:bg-surface-overlay border-l-2 flex flex-col
+            className={`w-full text-left px-3 py-2 text-sm cursor-pointer hover:bg-surface-overlay border-l-2 flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset
               ${conversation.path === selectedConversationId
                 ? 'border-accent bg-accent-subtle text-text-primary'
                 : 'border-transparent text-text-secondary'
@@ -63,8 +63,7 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
             >
             <span>{indexEntry?.firstMessage || conversation.filename}</span>
             <span className="text-xs text-text-muted">{indexEntry?.date}</span>
-            
-          </div>
+          </button>
           )
         })}
       </div>
@@ -72,10 +71,14 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
     <div>
       {index && index.skipped.length > 0 && (
         <>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary w-full text-left px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+          >
             <AlertTriangle size={14} />
             <span>{index.skipped.length} files skipped</span>
-          </div>
+          </button>
           {isOpen && index.skipped.map((file, i) => (
             <p key={i} className="text-xs text-text-secondary">
               {file.path} - {file.errorMessage}
