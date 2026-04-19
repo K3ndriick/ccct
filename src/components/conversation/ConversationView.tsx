@@ -1,6 +1,7 @@
 import type { ParsedConversation } from "../../types";
 import UserMessage from "./UserMessage";
 import AssistantMessage from "./AssistantMessage";
+import ConversationHeader from "./ConversationHeader";
 import { MessageSquare, AlertTriangle } from "lucide-react";
 
 type ConversationViewProps = {
@@ -13,6 +14,7 @@ export default function ConversationView({ conversation, error } : ConversationV
     <div className="h-full p-6 overflow-y-auto">
       {conversation && (
         <div className="flex flex-col gap-4">
+          <ConversationHeader conversation={conversation} />
           {conversation.messages.map((message, i) =>
             (message.role === "assistant"
               ? <AssistantMessage key={i} text={message.text} thinkingBlocks={message.thinkingBlocks} toolCalls={message.toolCalls}/>

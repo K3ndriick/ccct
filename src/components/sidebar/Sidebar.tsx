@@ -1,5 +1,6 @@
-import { AlertTriangle, RefreshCcw, Loader2, FolderOpen } from "lucide-react";
+import { AlertTriangle, RefreshCcw, Loader2, FolderOpen, Search } from "lucide-react";
 import Button from "../ui/Button";
+import Input from "../ui/Input";
 import type { ProjectEntry } from "../../types";
 import type { Index, IndexEntry } from "../../lib/indexer";
 import { useMemo, useState} from "react";
@@ -15,7 +16,8 @@ type SidebarProps = {
 
 export default function Sidebar({ projects, selectedConversationId, onSelectConversation, dirError, index, onReindex } : SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [query, setQuery] = useState('');
+
   // Build a path -> IndexEntry lookup map for O(1) access when rendering
   // conversation items. Rebuilds only when index changes, not on every render.
   const indexLookup = useMemo(() => {
@@ -27,6 +29,22 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
     }
     return map;
   }, [index]);
+
+  // grabbing projects that meet the search query
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+    const q = query.trim().toLowerCase();
+    if (!q) return projects;
+    return projects
+      .map(project => ({
+        ...project,
+        files: project.files.filter(conv => {
+          const label = indexLookup.get(conv.path)?.firstMessage ?? conv.filename;
+          return label.toLowerCase().includes(q);
+        }),
+      }))
+      .filter(project => project.files.length > 0);
+  }, [projects, query, indexLookup]);
 
 
   if (!projects) {
@@ -60,7 +78,22 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
   
   return (
   <div className="h-full flex flex-col">
-    {projects.map((project) => (
+    <div className="px-3 py-2 border-b border-surface-border relative">
+      <Search size={12} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+      <Input
+        placeholder="Search conversations..."
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        className="w-full pl-7 py-1.5 text-xs"
+      />
+    </div>
+    {filteredProjects.length === 0 && query && (
+      <div className="flex flex-col items-center justify-center flex-1 gap-1 text-center px-4">
+        <p className="text-sm text-text-secondary">No results</p>
+        <p className="text-xs text-text-muted">Try a different search term</p>
+      </div>
+    )}
+    {filteredProjects.map((project) => (
       <div key={project.name} className="mb-4">
         <p className="px-3 py-2 text-xs font-semibold uppercase text-text-muted tracking-wider">{project.name}</p>
 
