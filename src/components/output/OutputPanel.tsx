@@ -12,16 +12,18 @@ const MODELS = [
 ];
 
 type OutputPanelProps = {
-  conversation: ParsedConversation | null
+  conversation: ParsedConversation | null,
+  onOpenSettings: () => void
 }
 
-export default function OutputPanel({ conversation } : OutputPanelProps) {
+export default function OutputPanel({ conversation, onOpenSettings } : OutputPanelProps) {
   const [selectedModel, setSelectedModel] = useState(MODELS[1]);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAPIKeyError, setIsAPIKeyError] = useState(false);
 
   function handleCopy() {
     if (!generatedPrompt) return;
@@ -34,6 +36,7 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
     if (!conversation) return; 
     setIsLoading(true);
     setError(null);
+    setIsAPIKeyError(false);
 
     try {
       const apiKey = await invoke("get_api_key");
@@ -43,7 +46,7 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
     } catch (error) {
       const msg = String(error);
       if (msg.includes("password") || msg.includes("credential")) {
-        setError("No API key configured. Open Settings to add your Anthropic API key.");
+        setIsAPIKeyError(true);
       } else {
         setError(error instanceof Error ? error.message : String(error));
       }
@@ -77,8 +80,11 @@ export default function OutputPanel({ conversation } : OutputPanelProps) {
       {error && (
         <p className="text-xs text-status-error">{error}</p>
       )}
-      {!conversation && (
-        <p>No conversation selected</p>
+      {isAPIKeyError && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-status-error">No API key configured.</p>
+          <Button variant="secondary" onClick={onOpenSettings} className="w-full">Open Settings</Button>
+        </div>
       )}
 
       {generatedPrompt && (

@@ -7,6 +7,7 @@ import type { ParsedConversation, ProjectEntry, Settings } from "./types";
 import { invoke } from "@tauri-apps/api/core";
 import { parseJsonl } from "./lib/parser";
 import SettingsPanel from "./components/settings/SettingsPanel";
+import SettingsModal from "./components/settings/SettingsModal";
 import { buildIndex, updateIndex, type Index } from "./lib/indexer";
 
 function App() {
@@ -22,7 +23,8 @@ function App() {
 
   const [index, setIndex] = useState<Index | null>(null);
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -107,8 +109,14 @@ function App() {
   return (
     <>
       <div className="flex flex-col h-full bg-surface-base">
-        <TopBar onSettingsClick={() => setIsSettingsOpen(true)}/>
-        <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)}/>
+        <TopBar onSettingsClick={() => setIsSettingsModalOpen(true)}/>
+        {isSettingsModalOpen && (
+          <SettingsModal
+            onClose={() => setIsSettingsModalOpen(false)}
+            onOpenConfig={() => { setIsSettingsModalOpen(false); setIsConfigPanelOpen(true); }}
+          />
+        )}
+        <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)}/>
         <div className="flex flex-1">
           <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col">
             <Sidebar
@@ -121,10 +129,10 @@ function App() {
             />
           </div>
           <div className="flex-1 overflow-y-auto">
-            <ConversationView conversation={parsedConversation}/>
+            <ConversationView conversation={parsedConversation} error={fileError}/>
           </div>
           <div className="w-[320px] bg-surface-raised border-l border-surface-border">
-            <OutputPanel conversation={parsedConversation}/>
+            <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)}/>
           </div>
         </div>
         
