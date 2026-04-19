@@ -37,7 +37,7 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
           <p className="px-3 py-2 text-xs font-mono text-text-secondary border-t border-surface-border">
             {toolCall.result.result}
           </p>
-          {toolCall.type === "edit" && <DiffView diff={toolCall.diff}/>}
+          {toolCall.type === "edit" && <DiffView oldString={toolCall.oldString} newString={toolCall.newString}/>}
         </div>
       </div>
     </Card>

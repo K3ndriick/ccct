@@ -13,7 +13,7 @@ type ToolCallBase = {
 
 export type ToolCall =
   | ToolCallBase & { type: 'read';  filePath: string }
-  | ToolCallBase & { type: 'edit';  filePath: string; diff: string }
+  | ToolCallBase & { type: 'edit';  filePath: string; oldString: string; newString: string }
   | ToolCallBase & { type: 'bash';  command: string }
   | ToolCallBase & { type: 'glob';  pattern: string }
 	| ToolCallBase & { type: 'write'; filePath: string }

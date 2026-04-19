@@ -156,7 +156,8 @@ export function parseJsonl(raw: string): ParsedConversation {
               type: 'edit',
               filePath: toolCallToMatch.block.input.file_path as string,
               result: toolResult,
-              diff: toolCallToMatch.block.input.new_string as string
+              oldString: toolCallToMatch.block.input.old_string as string ?? '',
+              newString: toolCallToMatch.block.input.new_string as string ?? ''
             })
             break;
 

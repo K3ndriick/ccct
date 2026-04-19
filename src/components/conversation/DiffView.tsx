@@ -1,22 +1,42 @@
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
+
 type DiffViewProps = {
-  diff: string
+  oldString: string
+  newString: string
 }
 
-export default function DiffView({ diff } : DiffViewProps) {
-  const lines = diff.split("\n");
+const customStyles = {
+  variables: {
+    dark: {
+      diffViewerBackground: 'transparent',
+      addedBackground: '#1a2e1a',
+      addedColor: '#22c55e',
+      removedBackground: '#2e1a1a',
+      removedColor: '#ef4444',
+      wordAddedBackground: '#14532d',
+      wordRemovedBackground: '#7f1d1d',
+      addedGutterBackground: '#1a2e1a',
+      removedGutterBackground: '#2e1a1a',
+      gutterBackground: '#1a1917',
+      gutterColor: '#57534e',
+      codeFoldBackground: '#1c1917',
+      codeFoldContentColor: '#78716c',
+    },
+  },
+}
+
+export default function DiffView({ oldString, newString }: DiffViewProps) {
   return (
-    <div>
-      {lines.map((line, i) => 
-        <div 
-        key={i}
-        className={`font-mono text-xs px-2 py-0.5 ${
-          line.startsWith('+') ? 'bg-[#1a2e1a] text-[#22c55e]' :
-          line.startsWith('-') ? 'bg-[#2e1a1a] text-[#ef4444]' :
-          'bg-surface-raised text-text-muted'
-        }`}>
-          {line}
-        </div>
-      )}
+    <div className="rounded overflow-hidden text-xs font-mono">
+      <ReactDiffViewer
+        oldValue={oldString}
+        newValue={newString}
+        splitView={false}
+        compareMethod={DiffMethod.WORDS}
+        useDarkTheme
+        styles={customStyles}
+        hideLineNumbers={false}
+      />
     </div>
   )
 }
