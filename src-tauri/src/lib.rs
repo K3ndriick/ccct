@@ -182,6 +182,7 @@ pub fn run() {
       }
       Ok(())
     })
+    .plugin(tauri_plugin_dialog::init())
     // mapping rust functions for tauri
     .invoke_handler(tauri::generate_handler![
       read_file,
