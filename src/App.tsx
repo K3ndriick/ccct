@@ -117,8 +117,8 @@ function App() {
           />
         )}
         <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)}/>
-        <div className="flex flex-1">
-          <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col">
+        <div className="flex flex-1 min-h-0">
+          <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col min-h-0">
             <Sidebar
               projects={projectEntries}
               selectedConversationId={selectedConversationPath}
@@ -128,10 +128,10 @@ function App() {
               onReindex={reIndex}
             />
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 flex flex-col min-h-0">
             <ConversationView conversation={parsedConversation} error={fileError}/>
           </div>
-          <div className="w-[320px] bg-surface-raised border-l border-surface-border">
+          <div className="w-[320px] bg-surface-raised border-l border-surface-border flex flex-col min-h-0">
             <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)}/>
           </div>
         </div>

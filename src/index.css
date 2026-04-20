@@ -10,6 +10,13 @@
   padding: 0;
 }
 
+mark.search-highlight {
+  background-color: #fde047;
+  color: #0f0e0d;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
