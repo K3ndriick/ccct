@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, FolderOpen } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import type { Settings } from "../../types";
 import Button from "../ui/Button";
 import IconButton from "../ui/IconButton";
@@ -84,13 +85,25 @@ export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPane
           <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">
             Claude Directory
           </label>
-          <Input
-            type="text"
-            value={claudeDir}
-            onChange={(e) => setClaudeDir(e.target.value)}
-            placeholder="C:\Users\you\.claude"
-            className="w-full"
-          />
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              value={claudeDir}
+              onChange={(e) => setClaudeDir(e.target.value)}
+              placeholder="C:\Users\you\.claude"
+              className="flex-1"
+            />
+            <IconButton
+              label="Browse for folder"
+              className="px-2 border border-surface-border rounded-md hover:border-accent"
+              onClick={async () => {
+                const selected = await open({ directory: true, multiple: false });
+                if (typeof selected === 'string') setClaudeDir(selected);
+              }}
+            >
+              <FolderOpen size={16} />
+            </IconButton>
+          </div>
         </div>
 
         {/* API Key */}

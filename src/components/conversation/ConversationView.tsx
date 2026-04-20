@@ -5,7 +5,8 @@ import UserMessage from "./UserMessage";
 import AssistantMessage from "./AssistantMessage";
 import ConversationHeader from "./ConversationHeader";
 import ConversationSearch from "./ConversationSearch";
-import { MessageSquare, AlertTriangle } from "lucide-react";
+import { MessageSquare, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react";
+import IconButton from "../ui/IconButton";
 
 type ConversationViewProps = {
   conversation: ParsedConversation | null,
@@ -17,6 +18,16 @@ export default function ConversationView({ conversation, error }: ConversationVi
   const [searchQuery, setSearchQuery] = useState('');
   const [matchIndex, setMatchIndex] = useState(0);
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+  function onScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowScrollTop(el.scrollTop > 100);
+    setShowScrollBottom(el.scrollHeight - el.scrollTop - el.clientHeight > 100);
+  }
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -75,7 +86,7 @@ export default function ConversationView({ conversation, error }: ConversationVi
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0 relative">
       {/* Fixed header row - metadata left, search right */}
       {conversation && (
         <div className="flex-shrink-0 flex items-center gap-4 px-6 py-3 border-b border-surface-border bg-surface-base">
@@ -97,7 +108,7 @@ export default function ConversationView({ conversation, error }: ConversationVi
       )}
 
       {/* Scrollable message area */}
-      <div className="flex-1 overflow-y-auto relative min-h-0">
+      <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto relative min-h-0">
 
         {conversation && (
           <div className="flex flex-col gap-4 p-6">
@@ -139,6 +150,21 @@ export default function ConversationView({ conversation, error }: ConversationVi
           </div>
         )}
       </div>
+
+      {showScrollTop && (
+        <div className="absolute bottom-28 right-8">
+          <IconButton label="Scroll to top" className="p-3 rounded-full bg-zinc-600 border border-zinc-500 shadow-md text-white hover:bg-zinc-500 hover:text-white" onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <ArrowUp size={20} />
+          </IconButton>
+        </div>
+      )}
+      {showScrollBottom && (
+        <div className="absolute bottom-8 right-8">
+          <IconButton label="Scroll to bottom" className="p-3 rounded-full bg-zinc-600 border border-zinc-500 shadow-md text-white hover:bg-zinc-500 hover:text-white" onClick={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })}>
+            <ArrowDown size={20} />
+          </IconButton>
+        </div>
+      )}
     </div>
   );
 }
