@@ -4,6 +4,7 @@ import Input from "../ui/Input";
 import type { ProjectEntry } from "../../types";
 import type { Index, IndexEntry } from "../../lib/indexer";
 import { useMemo, useState } from "react";
+import { formatRelativeDate } from "../../lib/relativeDate";
 
 type SidebarProps = {
   projects: ProjectEntry[] | null,
@@ -106,18 +107,21 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
 
         {filteredProjects.map((project) => {
           const isCollapsed = collapsedProjects.has(project.name);
+          const folderName = project.path.split(/[\\/]/).pop() ?? '';
+          const decodedPath = folderName.replace(/-/g, '\\');
           return (
             <div key={project.name}>
               <button
                 onClick={() => toggleProject(project.name)}
                 aria-expanded={!isCollapsed}
+                title={decodedPath}
                 className="flex items-center gap-1.5 w-full px-3 py-2 text-xs font-semibold uppercase text-text-muted tracking-wider hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
               >
                 {isCollapsed
                   ? <ChevronRight size={12} className="shrink-0" />
                   : <ChevronDown size={12} className="shrink-0" />
                 }
-                <span className="truncate">{project.name}</span>
+                <span className="truncate">{decodedPath}</span>
                 <span className="ml-auto font-normal normal-case tracking-normal">{project.files.length}</span>
               </button>
 
@@ -134,7 +138,7 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
                       }`}
                   >
                     <span className="truncate text-xs">{indexEntry?.firstMessage || conversation.filename}</span>
-                    <span className="text-xs text-text-muted">{indexEntry?.date}</span>
+                    <span className="text-xs text-text-muted">{indexEntry?.date ? formatRelativeDate(indexEntry.date) : null}</span>
                   </button>
                 );
               })}

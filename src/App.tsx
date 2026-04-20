@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "./components/sidebar/Sidebar";
 import ConversationView from "./components/conversation/ConversationView";
 import OutputPanel from "./components/output/OutputPanel";
@@ -26,6 +26,26 @@ function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const isDragging = useRef(false);
+
+  function onDragStart() {
+    isDragging.current = true;
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+  }
+
+  function onDragMove(e: MouseEvent) {
+    if (!isDragging.current) return;
+    setSidebarWidth(Math.min(480, Math.max(160, e.clientX)));
+  }
+
+  function onDragEnd() {
+    isDragging.current = false;
+    document.removeEventListener('mousemove', onDragMove);
+    document.removeEventListener('mouseup', onDragEnd);
+  }
 
   useEffect(() => {
   async function load() {
@@ -118,7 +138,7 @@ function App() {
         )}
         <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)}/>
         <div className="flex flex-1 min-h-0">
-          <div className="w-[240px] bg-surface-raised border-r border-surface-border flex flex-col min-h-0">
+          <div style={{ width: sidebarWidth }} className="bg-surface-raised flex flex-col min-h-0 flex-shrink-0">
             <Sidebar
               projects={projectEntries}
               selectedConversationId={selectedConversationPath}
@@ -128,6 +148,10 @@ function App() {
               onReindex={reIndex}
             />
           </div>
+          <div
+            onMouseDown={onDragStart}
+            className="w-1 cursor-col-resize bg-surface-border hover:bg-accent transition-colors flex-shrink-0"
+          />
           <div className="flex-1 flex flex-col min-h-0">
             <ConversationView conversation={parsedConversation} error={fileError}/>
           </div>

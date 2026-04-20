@@ -7,9 +7,19 @@ import ToolResultRenderer from "./toolResults";
 
 type ToolCallCardProps = {
   toolCall: ToolCall
+  cwd?: string
 }
 
-export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
+function toRelativePath(filePath: string, cwd?: string): string {
+  if (!cwd) return filePath.split(/[\\/]/).pop() ?? filePath;
+  const cwdParent = cwd.replace(/[\\/][^\\/]+$/, '');
+  if (filePath.startsWith(cwdParent)) {
+    return filePath.slice(cwdParent.length).replace(/^[\\/]/, '');
+  }
+  return filePath.split(/[\\/]/).pop() ?? filePath;
+}
+
+export default function ToolCallCard({ toolCall, cwd } : ToolCallCardProps) {
   const [isOpen, setIsOpen] = useState(toolCall.result.status === 'error');
 
   return(
@@ -24,7 +34,9 @@ export default function ToolCallCard({ toolCall } : ToolCallCardProps) {
         {toolCall.type}
 
         {(toolCall.type === "read" || toolCall.type === "edit" || toolCall.type === "write") &&
-          <span>{toolCall.filePath}</span>
+          <span className="truncate text-text-muted" title={toolCall.filePath}>
+            {toRelativePath(toolCall.filePath, cwd)}
+          </span>
         }
 
         {toolCall.type === "bash" &&

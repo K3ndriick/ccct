@@ -114,7 +114,7 @@ export default function ConversationView({ conversation, error }: ConversationVi
                   }`}
                 >
                   {message.role === "assistant"
-                    ? <AssistantMessage text={message.text} thinkingBlocks={message.thinkingBlocks} toolCalls={message.toolCalls} />
+                    ? <AssistantMessage text={message.text} thinkingBlocks={message.thinkingBlocks} toolCalls={message.toolCalls} cwd={conversation.cwd} />
                     : <UserMessage text={message.text} />
                   }
                 </div>

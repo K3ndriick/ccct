@@ -6,10 +6,11 @@ import ReactMarkdown from "react-markdown";
 type AssistantMessageProps = {
   text?: string,
   thinkingBlocks: ThinkingBlockType[],
-  toolCalls: ToolCall[]
+  toolCalls: ToolCall[],
+  cwd?: string
 }
 
-export default function AssistantMessage({ text, thinkingBlocks, toolCalls } : AssistantMessageProps) {
+export default function AssistantMessage({ text, thinkingBlocks, toolCalls, cwd } : AssistantMessageProps) {
   return(
     <div className="border-l-2 border-surface-border pl-4 flex flex-col gap-2">
       <p className="text-xs text-text-muted mb-1">Claude</p>
@@ -22,7 +23,7 @@ export default function AssistantMessage({ text, thinkingBlocks, toolCalls } : A
         <ThinkingBlock key={i} text={thinkingBlock.text}/>
       ))}
       {toolCalls.map((toolCall, i) => (
-        <ToolCallCard key={i} toolCall={toolCall}/>
+        <ToolCallCard key={i} toolCall={toolCall} cwd={cwd}/>
       ))}
     </div>
   )
