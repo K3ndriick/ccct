@@ -42,6 +42,12 @@ export default function ToolCallCard({ toolCall, cwd } : ToolCallCardProps) {
         {toolCall.type === "bash" &&
           <span>{toolCall.command}</span>
         }
+
+        <span
+          className={`ml-auto w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+            toolCall.result.status === 'error' ? 'bg-status-error' : 'bg-status-success'
+          }`}
+        />
       </button>
 
       <div className={`grid transition-all duration-150 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>

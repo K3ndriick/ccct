@@ -88,7 +88,7 @@ export default function OutputPanel({ conversation, onOpenSettings } : OutputPan
       )}
 
       {generatedPrompt && (
-        <div className="flex-1 flex flex-col gap-2 min-h-0">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <p className="text-xs text-text-muted">Generated prompt</p>
             <Button variant="ghost" onClick={handleCopy} className="flex items-center gap-1 text-xs">
@@ -96,7 +96,7 @@ export default function OutputPanel({ conversation, onOpenSettings } : OutputPan
               {copied ? "Copied" : "Copy"}
             </Button>
           </div>
-          <pre className="flex-1 overflow-auto bg-surface-raised border border-surface-border rounded-md p-3 text-xs font-mono text-text-secondary whitespace-pre-wrap">
+          <pre className="bg-surface-raised border border-surface-border rounded-md p-3 text-xs font-mono text-text-secondary whitespace-pre-wrap">
             {generatedPrompt}
           </pre>
         </div>

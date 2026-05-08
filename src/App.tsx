@@ -47,6 +47,26 @@ function App() {
     document.removeEventListener('mouseup', onDragEnd);
   }
 
+  const [outputPanelWidth, setOutputPanelWidth] = useState(320);
+  const isOutputDragging = useRef(false);
+
+  function onOutputDragStart() {
+    isOutputDragging.current = true;
+    document.addEventListener('mousemove', onOutputDragMove);
+    document.addEventListener('mouseup', onOutputDragEnd);
+  }
+
+  function onOutputDragMove(e: MouseEvent) {
+    if (!isOutputDragging.current) return;
+    setOutputPanelWidth(Math.min(600, Math.max(240, window.innerWidth - e.clientX)));
+  }
+
+  function onOutputDragEnd() {
+    isOutputDragging.current = false;
+    document.removeEventListener('mousemove', onOutputDragMove);
+    document.removeEventListener('mouseup', onOutputDragEnd);
+  }
+
   useEffect(() => {
   async function load() {
   try {
@@ -155,9 +175,20 @@ function App() {
           <div className="flex-1 flex flex-col min-h-0">
             <ConversationView conversation={parsedConversation} error={fileError}/>
           </div>
-          <div className="w-[320px] bg-surface-raised border-l border-surface-border flex flex-col min-h-0">
-            <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)}/>
-          </div>
+          {parsedConversation && (
+            <>
+              <div
+                onMouseDown={onOutputDragStart}
+                className="w-1 cursor-col-resize bg-surface-border hover:bg-accent transition-colors flex-shrink-0"
+              />
+              <div
+                style={{ width: outputPanelWidth }}
+                className="bg-surface-raised flex flex-col min-h-0 overflow-y-auto flex-shrink-0"
+              >
+                <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)}/>
+              </div>
+            </>
+          )}
         </div>
         
       </div>

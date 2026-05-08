@@ -19,7 +19,7 @@ export default function ConversationHeader({ conversation }: Props) {
   const messageCount = conversation.messages.length
 
   return (
-    <div className="mb-6 pb-4 border-b border-surface-border flex flex-wrap gap-x-6 gap-y-1">
+    <div className="flex flex-wrap gap-x-6 gap-y-1">
       {conversation.cwd && (
         <span className="flex items-center gap-1.5 text-xs text-text-muted" title={conversation.cwd}>
           <FolderOpen size={12} className="shrink-0" />
