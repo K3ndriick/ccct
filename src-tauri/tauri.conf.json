@@ -12,11 +12,15 @@
   "app": {
     "windows": [
       {
-        "title": "Claude Code Context Transfer",
-        "width": 800,
-        "height": 600,
+        "title": "CCCT",
+        "width": 1100,
+        "height": 700,
+        "minWidth": 800,
+        "minHeight": 500,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "decorations": false,
+        "theme": "Dark"
       }
     ],
     "security": {
