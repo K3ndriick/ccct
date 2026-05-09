@@ -1,8 +1,8 @@
 # Product Requirements Document
 ## CCCT - Claude Code Context Transfer
 
-**Version**: 0.1  
-**Status**: In Development  
+**Version**: 1.0  
+**Status**: Shipped  
 **Platform**: Windows (desktop app)  
 **Stack**: React + TypeScript + Rust + Tauri
 
@@ -79,7 +79,7 @@ Diff view for Write/Edit operations showing lines added/removed.
 
 One-click generation of a structured continuation prompt from a conversation.
 
-User clicks "Generate Condensed Prompt" → CCCT sends a structured payload to the Anthropic API → returns a markdown prompt ready to paste into a new Claude Code session.
+User clicks "Generate Condensed Prompt" -> CCCT sends a structured payload to the Anthropic API -> returns a markdown prompt ready to paste into a new Claude Code session.
 
 **What gets sent to the API**:
 - Project metadata (name, branch, date, model)

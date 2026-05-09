@@ -18,30 +18,50 @@ src/
   types/
     index.ts              - all shared TypeScript types (single source of truth)
   lib/
-    mockData.ts           - mock Project[] used in Phase 1
-    parser.ts             - (Phase 2) JSONL -> typed conversation object
-    anthropic.ts          - (Phase 3) API call to generate prompt
+    parser.ts             - JSONL -> typed conversation object
+    anthropic.ts          - API call to generate prompt
+    indexer.ts            - build/load/update index.json in AppData
+    relativeDate.ts       - human-readable date formatting
+    mockData.ts           - mock data used in Phase 1 (retained, unused in prod)
   components/
+    TopBar.tsx            - custom title bar with window controls
     sidebar/
       Sidebar.tsx
     conversation/
       ConversationView.tsx
+      ConversationHeader.tsx
+      ConversationSearch.tsx
       UserMessage.tsx
       AssistantMessage.tsx
       ThinkingBlock.tsx
       ToolCallCard.tsx
-      DiffView.tsx        - (not yet built) renders edit diffs
+      ToolIcon.tsx
+      DiffView.tsx
+      toolResults/
+        BashResultRenderer.tsx
+        EditResultRenderer.tsx
+        FileResultRenderer.tsx
+        FallbackRenderer.tsx
+        index.tsx
     output/
       OutputPanel.tsx
-      GenerateButton.tsx  - (not yet built) extracted button component
+    settings/
+      SettingsModal.tsx
+      SettingsPanel.tsx
+    ui/
+      Button.tsx
+      IconButton.tsx
+      Input.tsx
+      Card.tsx
   App.tsx                 - root, owns selectedConversationId state
   index.css               - Tailwind directives + Google Fonts import
 tailwind.config.js        - design token definitions
 docs/
-  PRD.md
-  DESIGN.md
-  PROJECT_TRACKER.md
-  ARCHITECTURE.md         - this file
+  v1/
+    PRD.md
+    DESIGN.md
+    PROJECT_TRACKER.md
+    ARCHITECTURE.md       - this file
 ```
 
 Max 1 subfolder level inside `components/`.
@@ -136,18 +156,25 @@ Conversation
 ## Data Flow
 
 ```
-mockData.ts (projects: Project[])
-  -> App.tsx (flatMap + find -> selectedConversation)
-    -> Sidebar (renders project/conversation list)
-    -> ConversationView (renders messages)
-      -> UserMessage
-      -> AssistantMessage
-        -> ThinkingBlock[]
-        -> ToolCallCard[]
-    -> OutputPanel (model selector, generate, copy)
+Tauri invoke("read_claude_dir")
+  -> indexer.ts (build/load index.json from AppData)
+    -> App.tsx (projects: Project[], selectedConversationId state)
+      -> Sidebar (renders project/conversation list)
+      -> ConversationView (renders messages)
+        -> ConversationHeader
+        -> ConversationSearch
+        -> UserMessage
+        -> AssistantMessage
+          -> ThinkingBlock[]
+          -> ToolCallCard[]
+            -> toolResults/* (renderer per tool type)
+      -> OutputPanel (model selector, generate, copy)
+      -> SettingsModal -> SettingsPanel
 ```
 
 Data flows **down only** via props. No context, no global store.
+
+File content is loaded on demand: selecting a conversation triggers `invoke("read_jsonl_file", { path })`, the result is passed through `parseJsonl()`, and the resulting `ParsedConversation` flows down to `ConversationView` and `OutputPanel`.
 
 ---
 
@@ -206,10 +233,3 @@ Fonts:
 
 Google Fonts imported in `index.css` **before** `@tailwind` directives (CSS spec requires `@import` first).
 
----
-
-## Phase 1 Rendering Notes
-
-- `AssistantMessage` imports `ThinkingBlock as ThinkingBlockType` from types to avoid name collision with the `ThinkingBlock` component.
-- `ToolCallCard` renders `filePath` for read/edit/write, `command` for bash, and nothing extra for glob (pattern rendering not yet added).
-- `ConversationView` uses array index as `key` for messages. This is acceptable for Phase 1 with static mock data. In Phase 2+, use a stable id from the parsed record.
