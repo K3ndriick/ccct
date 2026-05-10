@@ -116,12 +116,14 @@ Full setup guide and conventions: [docs/decisions/recommended-workflow.md](docs/
 
 ## Building v1 locally
 
+> **Note**: A distributable installer is not yet available. Running from source requires a local dev environment. A packaged release is planned.
+
 Prerequisites: Node.js, Rust, Tauri 2 prerequisites for your platform.
 
 ```bash
 npm install
 npm run tauri dev      # development
-npm run tauri build    # production .msi (Windows)
+npm run tauri build    # production build (Windows)
 ```
 
 For development, set `VITE_ANTHROPIC_API_KEY` in `.env` (gitignored). For production, the API key is read from the OS keychain via the Settings panel.
@@ -138,4 +140,4 @@ Built as a personal project to learn Tauri + Rust + the Anthropic API, and as a 
 
 ## License
 
-MIT (or whatever you prefer - update this line).
+Copyright (c) 2026 Kendrick Lee (K3ndriick). All Rights Reserved. See [LICENSE](LICENSE) for details.
