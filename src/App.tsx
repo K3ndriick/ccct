@@ -6,9 +6,12 @@ import TopBar from "./components/TopBar";
 import type { ParsedConversation, ProjectEntry, Settings } from "./types";
 import { invoke } from "@tauri-apps/api/core";
 import { parseJsonl } from "./lib/parser";
+import { verifyApiKey } from "./lib/anthropic";
 import SettingsPanel from "./components/settings/SettingsPanel";
 import SettingsModal from "./components/settings/SettingsModal";
 import { buildIndex, updateIndex, type Index } from "./lib/indexer";
+
+const FALLBACK_MODELS = ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5"];
 
 function App() {
   const [selectedConversationPath, setSelectedConversationPath] = useState<string | null>(null);
@@ -22,6 +25,8 @@ function App() {
   const [fileError, setFileError] = useState<string | null>(null);
 
   const [index, setIndex] = useState<Index | null>(null);
+
+  const [availableModels, setAvailableModels] = useState<string[]>(FALLBACK_MODELS);
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -66,6 +71,19 @@ function App() {
     document.removeEventListener('mousemove', onOutputDragMove);
     document.removeEventListener('mouseup', onOutputDragEnd);
   }
+
+  useEffect(() => {
+    async function loadModels() {
+      try {
+        const key = await invoke<string>("get_api_key");
+        const models = await verifyApiKey(key);
+        setAvailableModels(models);
+      } catch {
+        // no key or network error - fallback list stays
+      }
+    }
+    loadModels();
+  }, []);
 
   useEffect(() => {
   async function load() {
@@ -156,7 +174,7 @@ function App() {
             onOpenConfig={() => { setIsSettingsModalOpen(false); setIsConfigPanelOpen(true); }}
           />
         )}
-        <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)}/>
+        <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)} onModelsLoaded={setAvailableModels} onDisconnected={() => setAvailableModels(FALLBACK_MODELS)}/>
         <div className="flex flex-1 min-h-0">
           <div style={{ width: sidebarWidth }} className="bg-surface-raised flex flex-col min-h-0 flex-shrink-0">
             <Sidebar
@@ -185,7 +203,7 @@ function App() {
                 style={{ width: outputPanelWidth }}
                 className="bg-surface-raised flex flex-col min-h-0 overflow-y-auto flex-shrink-0"
               >
-                <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)}/>
+                <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)} models={availableModels}/>
               </div>
             </>
           )}

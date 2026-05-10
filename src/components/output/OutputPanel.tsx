@@ -1,23 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check } from "lucide-react";
 import type { ParsedConversation } from "../../types";
 import { generateContinuationPrompt } from "../../lib/anthropic";
 import { invoke } from "@tauri-apps/api/core";
 import Button from "../ui/Button";
 
-const MODELS = [
-  "claude-opus-4-6",
-  "claude-sonnet-4-6",
-  "claude-haiku-4-5",
-];
-
 type OutputPanelProps = {
   conversation: ParsedConversation | null,
-  onOpenSettings: () => void
+  onOpenSettings: () => void,
+  models: string[],
 }
 
-export default function OutputPanel({ conversation, onOpenSettings } : OutputPanelProps) {
-  const [selectedModel, setSelectedModel] = useState(MODELS[1]);
+export default function OutputPanel({ conversation, onOpenSettings, models } : OutputPanelProps) {
+  const [selectedModel, setSelectedModel] = useState(models[1] ?? models[0]);
+
+  useEffect(() => {
+    if (!models.includes(selectedModel)) {
+      setSelectedModel(models[1] ?? models[0]);
+    }
+  }, [models]);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -64,7 +65,7 @@ export default function OutputPanel({ conversation, onOpenSettings } : OutputPan
         onChange={(e) => setSelectedModel(e.target.value)}
         className="w-full bg-surface-raised border border-surface-border rounded-md px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
-        {MODELS.map((model) => (
+        {models.map((model: string) => (
           <option key={model} value={model}>{model}</option>
         ))}
       </select>

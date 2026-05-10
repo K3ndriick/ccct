@@ -6,58 +6,43 @@ import type { Settings } from "../../types";
 import Button from "../ui/Button";
 import IconButton from "../ui/IconButton";
 import Input from "../ui/Input";
+import ApiKeyCard from "./ApiKeyCard";
 
 type SettingsPanelProps = {
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
+  onModelsLoaded: (models: string[]) => void;
+  onDisconnected: () => void;
 };
 
-export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPanelProps) {
+export default function SettingsPanel({ isOpen, onClose, onSaved, onModelsLoaded, onDisconnected }: SettingsPanelProps) {
   const [claudeDir, setClaudeDir] = useState("");
-  const [apiKey, setApiKey] = useState("");
   const [autoIndex, setAutoIndex] = useState(true);
-  const [hasExistingKey, setHasExistingKey] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Load current settings and API key when panel opens
   useEffect(() => {
     async function load() {
       if (isOpen) {
         const settings = await invoke<Settings>("get_settings");
-
         setClaudeDir(settings.claudeDir);
         setAutoIndex(settings.autoIndex);
-
-        try {
-          await invoke("get_api_key");
-          setHasExistingKey(true);
-        } catch {
-          setHasExistingKey(false);
-        }
       }
     }
     load();
   }, [isOpen])
 
-  // handleSave function
   async function handleSave() {
     try {
       setIsSaving(true);
       setSaveError(null);
-
       await invoke("save_settings", { settings: { claudeDir, autoIndex } });
-
-      if (apiKey) {
-        await invoke("set_api_key", { key: apiKey });
-      }
       onSaved();
       onClose();
     } catch (error) {
       error instanceof Error ? setSaveError(error.message) : setSaveError("");
-
     } finally {
       setIsSaving(false);
     }
@@ -107,22 +92,7 @@ export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPane
         </div>
 
         {/* API Key */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-            Anthropic API Key
-          </label>
-          <Input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder={hasExistingKey ? "Key saved" : "sk-ant-..."}
-            mono
-            className="w-full"
-          />
-          {hasExistingKey && (
-            <p className="text-xs text-text-muted">Key is stored. Leave blank to keep current key.</p>
-          )}
-        </div>
+        <ApiKeyCard onModelsLoaded={onModelsLoaded} onDisconnected={onDisconnected} />
 
         {/* Auto-index toggle */}
         <div className="flex items-center justify-between">
