@@ -89,6 +89,14 @@ fn set_api_key(key: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn delete_api_key() -> Result<(), String> {
+  let keyring_entry = keyring::Entry::new("ccct", "anthropic_api_key").map_err(|e| e.to_string())?;
+  keyring_entry.delete_password().map_err(|e| e.to_string())?;
+
+  return Ok(())
+}
+
+#[tauri::command]
 fn get_settings() -> Result<Settings, String> {
   // build the path for settings file
   let app_data = std::env::var("APPDATA").map_err(|e|e.to_string())?;
@@ -189,6 +197,7 @@ pub fn run() {
       read_claude_dir,
       get_api_key,
       set_api_key,
+      delete_api_key,
       get_settings,
       save_settings,
       read_index,
