@@ -1,6 +1,27 @@
 import type { ParsedConversation } from "../types";
 import Anthropic from "@anthropic-ai/sdk";
 
+// verifyApiKey
+// makes a lightweight models.list() call - no tokens consumed, pure auth check
+// throws with a user-readable message on failure
+export async function verifyApiKey(apiKey: string): Promise<string[]> {
+  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+
+  try {
+    const page = await client.models.list();
+    return page.data.map((m) => m.id);
+  } catch (error) {
+    if (error instanceof Anthropic.AuthenticationError) {
+      throw new Error("Invalid API key - check it and try again");
+    } else if (error instanceof Anthropic.APIConnectionError) {
+      throw new Error("No connection - check your internet and try again");
+    } else if (error instanceof Anthropic.APIError) {
+      throw new Error(`API error ${error.status}: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
 // generateContinuationPrompt
 // takes a parsed conversation and a model string
 // builds a plain-text payload, sends it to the Anthropic API, returns the generated prompt as a string
