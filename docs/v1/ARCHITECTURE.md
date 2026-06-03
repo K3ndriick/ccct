@@ -85,15 +85,15 @@ App
 
 ## State Ownership
 
-### `selectedConversationId: string | null`
-**Lives in**: `App.tsx`
-**Why**: Both Sidebar (needs to highlight active item) and ConversationView + OutputPanel (need to render it) require this value. It must live in their shared parent.
-**Pattern**: Lifted state. App derives `selectedConversation` by flatMapping projects and finding by id, then passes the full `Conversation` object down to ConversationView and OutputPanel.
+### `selectedConversationPath: string | null`
+**Lives in**: `App.tsx` (passed to Sidebar as the `selectedConversationId` prop)
+**Why**: Both Sidebar (needs to highlight the active item) and ConversationView + OutputPanel (need to render it) require this value. It must live in their shared parent.
+**Pattern**: Lifted state. App stores the selected file's full path. A `useEffect` keyed on that path calls `invoke("read_file", { path })`, runs the result through `parseJsonl()`, and stores the resulting `ParsedConversation` in separate `parsedConversation` state, which flows down to ConversationView and OutputPanel.
 
 ```ts
-const selectedConversation = projects
-  .flatMap(p => p.conversations)
-  .find(c => c.id === selectedConversationId)
+// on selectedConversationPath change:
+const raw = await invoke<string>("read_file", { path: selectedConversationPath })
+setParsedConversation(parseJsonl(raw))
 ```
 
 ### Collapse state in ThinkingBlock and ToolCallCard
@@ -120,7 +120,7 @@ All types are in `src/types/index.ts`. No types are defined anywhere else.
 ```ts
 type ToolCall =
   | ToolCallBase & { type: 'read';  filePath: string }
-  | ToolCallBase & { type: 'edit';  filePath: string; diff: string }
+  | ToolCallBase & { type: 'edit';  filePath: string; oldString: string; newString: string }
   | ToolCallBase & { type: 'bash';  command: string }
   | ToolCallBase & { type: 'glob';  pattern: string }
   | ToolCallBase & { type: 'write'; filePath: string }
@@ -157,8 +157,8 @@ Conversation
 
 ```
 Tauri invoke("read_claude_dir")
-  -> indexer.ts (build/load index.json from AppData)
-    -> App.tsx (projects: Project[], selectedConversationId state)
+  -> indexer.ts (build/load/update index.json in AppData)
+    -> App.tsx (projectEntries: ProjectEntry[], index: Index, selectedConversationPath state)
       -> Sidebar (renders project/conversation list)
       -> ConversationView (renders messages)
         -> ConversationHeader
@@ -174,38 +174,31 @@ Tauri invoke("read_claude_dir")
 
 Data flows **down only** via props. No context, no global store.
 
-File content is loaded on demand: selecting a conversation triggers `invoke("read_jsonl_file", { path })`, the result is passed through `parseJsonl()`, and the resulting `ParsedConversation` flows down to `ConversationView` and `OutputPanel`.
+File content is loaded on demand: selecting a conversation triggers `invoke("read_file", { path })`, the result is passed through `parseJsonl()`, and the resulting `ParsedConversation` flows down to `ConversationView` and `OutputPanel`.
 
 ---
 
 ## Key Design Decisions
 
-### First message preview derived at render time
-The sidebar shows a truncated preview of the first user message. This is derived at render, not stored as a field on `Conversation`.
+### First message preview computed during indexing
+The sidebar shows a truncated preview of the first user message. It is computed once when the index is built (`indexer.ts`), truncated to 80 chars, and stored as `firstMessage` on each `IndexEntry`.
 ```ts
-conversation.messages.find(m => m.role === 'user')?.text.slice(0, 60)
+const firstUserMessage = parsed.messages.find(m => m.role === 'user')
+const firstMessage = firstUserMessage?.text?.slice(0, 80) ?? ''
 ```
-Reason: storing it would duplicate data already in `messages[]` and require keeping it in sync.
+Reason: the index is cached to AppData, so the preview is parsed once and reused across launches instead of re-reading every session file on each render.
 
 ### Output prompt is read-only
 Generated prompt is shown in a `<pre>` block with a copy button. No inline editing.
 Reason: target users are developers who trust the output and tweak it externally (in their editor or in the Claude chat input). Adding a textarea adds state complexity with no real user benefit.
 
-### Output format is Claude-optimized XML
-```xml
-<context_transfer>
-  <session_summary>...</session_summary>
-  <files_modified>...</files_modified>
-  <decisions_made>...</decisions_made>
-  <current_state>...</current_state>
-  <next_steps>...</next_steps>
-</context_transfer>
-```
-Reason: CCCT targets developers doing serious engineering, not beginners. Dense structured XML is more token-efficient and machine-readable than prose paragraphs.
+### Output is a model-generated continuation prompt, not a fixed schema
+The system prompt in `anthropic.ts` instructs the model to produce a structured continuation prompt "optimised for Claude/Claude Code to consume, not human prose." CCCT does not impose a fixed template (e.g. a specific XML schema) or post-process the response - the structure is left to the model.
+Reason: CCCT targets developers doing serious engineering, not beginners. A dense, machine-readable summary the next session can consume directly matters more than human prose; pinning an exact template was deferred because the model's own structured output proved sufficient.
 
-### No Radix UI in Phase 1
-Collapsibles are implemented with `useState` + conditional rendering. Radix UI is not installed.
-Reason: Sufficient for Phase 1. Accessibility improvements deferred to Phase 5.
+### Collapsibles use `useState`, not Radix
+Collapsibles (ThinkingBlock, ToolCallCard) are implemented with `useState` + conditional rendering. Radix UI (`@radix-ui/react-collapsible`, `@radix-ui/react-tooltip`) is listed as a dependency but is not yet imported anywhere.
+Reason: the hand-rolled approach was sufficient for Phase 1; the Radix packages were added ahead of a planned accessibility pass that has not yet replaced the manual collapsibles.
 
 ---
 

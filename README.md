@@ -126,7 +126,7 @@ npm run tauri dev      # development
 npm run tauri build    # production build (Windows)
 ```
 
-For development, set `VITE_ANTHROPIC_API_KEY` in `.env` (gitignored). For production, the API key is read from the OS keychain via the Settings panel.
+The Anthropic API key is entered through the Settings panel and stored in the OS keychain (Windows Credential Manager) in both development and production - it is never read from a file or environment variable.
 
 ---
 

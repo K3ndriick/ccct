@@ -33,7 +33,7 @@ Three panels:
 
 **Sidebar** - discovers all Claude Code projects and sessions from `~/.claude/projects/`, indexes them in AppData on first launch and incrementally on subsequent opens, and renders them as a browsable list organized by project.
 
-**Conversation view** - renders a selected session as a clean chat interface: user messages, assistant text, tool calls (Read, Write, Edit, Bash, Glob) with their inputs and results, thinking blocks, and diffs for edit operations. Noise (queue operations, file history snapshots, base64 content) is filtered out.
+**Conversation view** - renders a selected session as a clean chat interface: user messages, assistant text, tool calls (Read, Write, Edit, Bash, Glob) with their inputs and results, thinking blocks, and diffs for edit operations. Noise (queue operations, file history snapshots, sidechain records, and IDE-injected context blocks) is filtered out.
 
 **Output panel** - generates a structured continuation prompt via the Anthropic API from the selected session. The prompt is designed to be pasted into a new Claude Code session to restore context without re-explaining the project from scratch. One click copies it to clipboard.
 
@@ -51,7 +51,7 @@ Additional v1 features: Settings panel with auto-detected Claude directory, API 
 - **Rust backend**: required by Tauri, kept intentionally thin - only native OS operations.
 - **React 19 + TypeScript**: standard frontend stack, chosen for familiarity.
 - **Tailwind CSS v3** with a custom warm dark design system (electric green accent, Inter + JetBrains Mono).
-- **Anthropic API** (`claude-sonnet-4-6`) for the continuation prompt generation.
+- **Anthropic API** for the continuation prompt generation - the model is user-selectable (defaults to Sonnet), populated live from `models.list()` with a hardcoded fallback list.
 - Discriminated unions for `ToolCall` and `Message` types: TypeScript narrows on the `type`/`role` field, so accessing `.command` on a Read tool call is a compile error. See ADR-002.
 - **OS keychain** for API key storage via the `keyring` Rust crate: the key is stored in Windows Credential Manager and never written to disk. See ADR-004.
 
