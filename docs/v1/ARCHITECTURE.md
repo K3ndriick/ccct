@@ -1,5 +1,7 @@
 # CCCT Architecture
 
+> **The canonical architecture picture lives in [ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md)** - a macro system diagram and a micro data-flow/parse pipeline. This document covers the React-level detail the diagrams don't: folder structure, component render tree, and state ownership.
+
 ## What This App Does
 
 CCCT reads Claude Code conversation files (`.jsonl`) and generates a condensed context-transfer prompt so developers can continue a session in a fresh Claude chat without losing context.
@@ -154,6 +156,8 @@ Conversation
 ---
 
 ## Data Flow
+
+The macro component map and the JSONL parse pipeline are in [ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md). The tree below is the React render hierarchy and prop flow specifically.
 
 ```
 Tauri invoke("read_claude_dir")

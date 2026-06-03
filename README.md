@@ -66,7 +66,7 @@ Other v1 features:
 
 Stack: Tauri 2, React 19, TypeScript 5.9, Vite 7, Tailwind CSS v3, Rust.
 
-Full v1 design and architecture: [docs/v1/](docs/v1/).
+Full v1 design and architecture: [docs/v1/](docs/v1/) - start with the [architecture diagrams](docs/v1/ARCHITECTURE_DIAGRAMS.md).
 
 ---
 
