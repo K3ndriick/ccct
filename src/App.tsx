@@ -18,10 +18,10 @@ function App() {
   const [parsedConversation, setParsedConversation] = useState<ParsedConversation | null>(null);
   const [projectEntries, setProjectEntries] = useState<ProjectEntry[] | null>(null);
 
-  const [isLoadingDir, setIsLoadingDir] = useState(false);
+  const [, setIsLoadingDir] = useState(false);
   const [dirError, setDirError] = useState<string | null>(null);
 
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [, setIsLoadingFile] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
 
   const [index, setIndex] = useState<Index | null>(null);
