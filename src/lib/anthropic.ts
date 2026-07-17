@@ -113,7 +113,7 @@ function buildPayload(conversation: ParsedConversation): string {
             return `write: ${toolCall.filePath}`;
 
           } else if (toolCall.type === "edit") {
-            return `edit: ${toolCall.filePath} (diff: ${toolCall.diff})`;
+            return `edit: ${toolCall.filePath}`;
           }
         })
         .join(", ")

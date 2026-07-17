@@ -1,12 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Sidebar from "./components/sidebar/Sidebar";
-import ConversationView from "./components/conversation/ConversationView";
-import OutputPanel from "./components/output/OutputPanel";
+import ConversationView, { type ConversationViewHandle } from "./components/conversation/ConversationView";
+import RightPanel from "./components/output/RightPanel";
 import TopBar from "./components/TopBar";
+import CommandPalette, { type PaletteAction } from "./components/CommandPalette";
 import type { ParsedConversation, ProjectEntry, Settings } from "./types";
 import { invoke } from "@tauri-apps/api/core";
 import { parseJsonl } from "./lib/parser";
 import { verifyApiKey } from "./lib/anthropic";
+import { getSessionMeta } from "./lib/sessionMeta";
+import { modKey } from "./lib/platform";
 import SettingsPanel from "./components/settings/SettingsPanel";
 import SettingsModal from "./components/settings/SettingsModal";
 import { buildIndex, updateIndex, type Index } from "./lib/indexer";
@@ -18,7 +21,7 @@ function App() {
   const [parsedConversation, setParsedConversation] = useState<ParsedConversation | null>(null);
   const [projectEntries, setProjectEntries] = useState<ProjectEntry[] | null>(null);
 
-  const [isLoadingDir, setIsLoadingDir] = useState(false);
+  const [, setIsLoadingDir] = useState(false);
   const [dirError, setDirError] = useState<string | null>(null);
 
   const [isLoadingFile, setIsLoadingFile] = useState(false);
@@ -31,6 +34,13 @@ function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const conversationViewRef = useRef<ConversationViewHandle>(null);
+  const meta = useMemo(
+    () => (parsedConversation ? getSessionMeta(parsedConversation) : null),
+    [parsedConversation]
+  );
 
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const isDragging = useRef(false);
@@ -71,6 +81,17 @@ function App() {
     document.removeEventListener('mousemove', onOutputDragMove);
     document.removeEventListener('mouseup', onOutputDragEnd);
   }
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     async function loadModels() {
@@ -164,10 +185,15 @@ function App() {
     }
   }
 
+  const paletteActions: PaletteAction[] = [
+    { id: "settings", label: "Open settings", hint: modKey(","), run: () => setIsSettingsModalOpen(true) },
+    { id: "reindex", label: "Re-index all conversations", run: () => reIndex() },
+  ];
+
   return (
     <>
       <div className="flex flex-col h-full bg-surface-base">
-        <TopBar onSettingsClick={() => setIsSettingsModalOpen(true)}/>
+        <TopBar onSettingsClick={() => setIsSettingsModalOpen(true)} onOpenPalette={() => setPaletteOpen(true)} />
         {isSettingsModalOpen && (
           <SettingsModal
             onClose={() => setIsSettingsModalOpen(false)}
@@ -175,6 +201,13 @@ function App() {
           />
         )}
         <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)} onModelsLoaded={setAvailableModels} onDisconnected={() => setAvailableModels(FALLBACK_MODELS)}/>
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          index={index}
+          onSelectConversation={(path) => setSelectedConversationPath(path)}
+          actions={paletteActions}
+        />
         <div className="flex flex-1 min-h-0">
           <div style={{ width: sidebarWidth }} className="bg-surface-raised flex flex-col min-h-0 flex-shrink-0">
             <Sidebar
@@ -191,7 +224,13 @@ function App() {
             className="w-1 cursor-col-resize bg-surface-border hover:bg-accent transition-colors flex-shrink-0"
           />
           <div className="flex-1 flex flex-col min-h-0">
-            <ConversationView conversation={parsedConversation} error={fileError}/>
+            <ConversationView
+              ref={conversationViewRef}
+              conversation={parsedConversation}
+              meta={meta}
+              isLoading={isLoadingFile}
+              error={fileError}
+            />
           </div>
           {parsedConversation && (
             <>
@@ -201,9 +240,15 @@ function App() {
               />
               <div
                 style={{ width: outputPanelWidth }}
-                className="bg-surface-raised flex flex-col min-h-0 overflow-y-auto flex-shrink-0"
+                className="bg-surface-raised flex flex-col min-h-0 flex-shrink-0"
               >
-                <OutputPanel conversation={parsedConversation} onOpenSettings={() => setIsSettingsModalOpen(true)} models={availableModels}/>
+                <RightPanel
+                  conversation={parsedConversation}
+                  meta={meta}
+                  onOpenSettings={() => setIsSettingsModalOpen(true)}
+                  models={availableModels}
+                  onJumpToTurn={(i) => conversationViewRef.current?.scrollToTurn(i)}
+                />
               </div>
             </>
           )}
