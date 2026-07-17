@@ -10,8 +10,11 @@ import { parseJsonl } from "./lib/parser";
 import { verifyApiKey } from "./lib/anthropic";
 import { getSessionMeta } from "./lib/sessionMeta";
 import { modKey } from "./lib/platform";
+import { maskKey, type ConnectionStatus } from "./lib/apiKey";
 import SettingsPanel from "./components/settings/SettingsPanel";
 import SettingsModal from "./components/settings/SettingsModal";
+import ConnectModal from "./components/ConnectModal";
+import HomeScreen from "./components/home/HomeScreen";
 import { buildIndex, updateIndex, type Index } from "./lib/indexer";
 
 const FALLBACK_MODELS = ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5"];
@@ -30,6 +33,10 @@ function App() {
   const [index, setIndex] = useState<Index | null>(null);
 
   const [availableModels, setAvailableModels] = useState<string[]>(FALLBACK_MODELS);
+
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
+  const [maskedKey, setMaskedKey] = useState("");
+  const [isConnectOpen, setIsConnectOpen] = useState(false);
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -93,18 +100,41 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // On launch, resolve the stored key into a connection status: connected (key
+  // verifies), error (key present but couldn't verify), or disconnected (no key).
   useEffect(() => {
-    async function loadModels() {
+    async function initConnection() {
       try {
         const key = await invoke<string>("get_api_key");
-        const models = await verifyApiKey(key);
-        setAvailableModels(models);
+        try {
+          const models = await verifyApiKey(key);
+          setAvailableModels(models);
+          setMaskedKey(maskKey(key));
+          setConnectionStatus("connected");
+        } catch {
+          setMaskedKey(maskKey(key));
+          setConnectionStatus("error");
+        }
       } catch {
-        // no key or network error - fallback list stays
+        setConnectionStatus("disconnected");
       }
     }
-    loadModels();
+    initConnection();
   }, []);
+
+  function handleConnected(models: string[], masked: string) {
+    setAvailableModels(models);
+    setMaskedKey(masked);
+    setConnectionStatus("connected");
+  }
+
+  function handleDisconnected() {
+    setAvailableModels(FALLBACK_MODELS);
+    setMaskedKey("");
+    setConnectionStatus("disconnected");
+  }
+
+  const modelCount = connectionStatus === "connected" ? availableModels.length : 0;
 
   useEffect(() => {
   async function load() {
@@ -193,14 +223,30 @@ function App() {
   return (
     <>
       <div className="flex flex-col h-full bg-surface-base">
-        <TopBar onSettingsClick={() => setIsSettingsModalOpen(true)} onOpenPalette={() => setPaletteOpen(true)} />
+        <TopBar
+          onSettingsClick={() => setIsSettingsModalOpen(true)}
+          onOpenPalette={() => setPaletteOpen(true)}
+          connectionStatus={connectionStatus}
+          modelCount={modelCount}
+          maskedKey={maskedKey}
+          onOpenConnect={() => setIsConnectOpen(true)}
+        />
         {isSettingsModalOpen && (
           <SettingsModal
             onClose={() => setIsSettingsModalOpen(false)}
             onOpenConfig={() => { setIsSettingsModalOpen(false); setIsConfigPanelOpen(true); }}
           />
         )}
-        <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)} onModelsLoaded={setAvailableModels} onDisconnected={() => setAvailableModels(FALLBACK_MODELS)}/>
+        <SettingsPanel isOpen={isConfigPanelOpen} onClose={() => setIsConfigPanelOpen(false)} onSaved={() => setRefreshKey((prev) => prev + 1)} />
+        <ConnectModal
+          open={isConnectOpen}
+          onClose={() => setIsConnectOpen(false)}
+          status={connectionStatus}
+          maskedKey={maskedKey}
+          modelCount={availableModels.length}
+          onConnected={handleConnected}
+          onDisconnected={handleDisconnected}
+        />
         <CommandPalette
           open={paletteOpen}
           onClose={() => setPaletteOpen(false)}
@@ -230,6 +276,16 @@ function App() {
               meta={meta}
               isLoading={isLoadingFile}
               error={fileError}
+              emptyState={
+                <HomeScreen
+                  connectionStatus={connectionStatus}
+                  modelCount={modelCount}
+                  onOpenConnect={() => setIsConnectOpen(true)}
+                  index={index}
+                  onSelectConversation={setSelectedConversationPath}
+                  onOpenPalette={() => setPaletteOpen(true)}
+                />
+              }
             />
           </div>
           {parsedConversation && (

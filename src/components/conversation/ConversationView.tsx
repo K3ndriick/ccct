@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import Mark from "mark.js";
 import type { ParsedConversation } from "../../types";
@@ -22,6 +22,7 @@ type ConversationViewProps = {
   meta: SessionMeta | null;
   error: string | null;
   isLoading: boolean;
+  emptyState?: ReactNode;
 };
 
 const prefersReducedMotion = () =>
@@ -37,7 +38,7 @@ function FilterPill({ label, on, onClick }: { label: string; on: boolean; onClic
     <button
       onClick={onClick}
       aria-pressed={on}
-      className={`inline-flex items-center gap-2 text-[11.5px] rounded-full px-2.5 py-1 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+      className={`inline-flex items-center gap-2 text-xs rounded-full px-2.5 py-1 border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
         on
           ? "bg-accent-subtle border-accent-line text-text-primary"
           : "bg-surface-header border-surface-border-strong text-text-secondary hover:border-surface-emphasis"
@@ -79,7 +80,7 @@ function ConversationSkeleton() {
 }
 
 const ConversationView = forwardRef<ConversationViewHandle, ConversationViewProps>(function ConversationView(
-  { conversation, meta, error, isLoading },
+  { conversation, meta, error, isLoading, emptyState },
   ref
 ) {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -261,20 +262,21 @@ const ConversationView = forwardRef<ConversationViewHandle, ConversationViewProp
           </div>
         )}
 
-        {!isLoading && !conversation && !error && (
-          <div className="flex flex-col items-center justify-center h-full gap-2.5 text-center px-10">
-            <MessageSquare size={40} strokeWidth={1.6} className="text-text-faint" />
-            <p className="text-sm font-semibold text-text-secondary">No conversation selected</p>
-            <p className="text-xs text-text-faint max-w-[36ch] leading-relaxed">
-              Pick a session from the sidebar, or search across everything to jump straight to what you need.
-            </p>
-            <p className="mt-1 font-mono text-[11px] text-text-muted">
-              Press{" "}
-              <kbd className="bg-surface-overlay border border-surface-border-strong rounded px-1.5 py-0.5">{modKey("K")}</kbd> to
-              search
-            </p>
-          </div>
-        )}
+        {!isLoading && !conversation && !error &&
+          (emptyState ?? (
+            <div className="flex flex-col items-center justify-center h-full gap-2.5 text-center px-10">
+              <MessageSquare size={40} strokeWidth={1.6} className="text-text-faint" />
+              <p className="text-sm font-semibold text-text-secondary">No conversation selected</p>
+              <p className="text-xs text-text-faint max-w-[36ch] leading-relaxed">
+                Pick a session from the sidebar, or search across everything to jump straight to what you need.
+              </p>
+              <p className="mt-1 font-mono text-[11px] text-text-muted">
+                Press{" "}
+                <kbd className="bg-surface-overlay border border-surface-border-strong rounded px-1.5 py-0.5">{modKey("K")}</kbd> to
+                search
+              </p>
+            </div>
+          ))}
 
         {!isLoading && error && (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-10">

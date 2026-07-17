@@ -6,17 +6,14 @@ import type { Settings } from "../../types";
 import Button from "../ui/Button";
 import IconButton from "../ui/IconButton";
 import Input from "../ui/Input";
-import ApiKeyCard from "./ApiKeyCard";
 
 type SettingsPanelProps = {
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
-  onModelsLoaded: (models: string[]) => void;
-  onDisconnected: () => void;
 };
 
-export default function SettingsPanel({ isOpen, onClose, onSaved, onModelsLoaded, onDisconnected }: SettingsPanelProps) {
+export default function SettingsPanel({ isOpen, onClose, onSaved }: SettingsPanelProps) {
   const [claudeDir, setClaudeDir] = useState("");
   const [autoIndex, setAutoIndex] = useState(true);
 
@@ -90,9 +87,6 @@ export default function SettingsPanel({ isOpen, onClose, onSaved, onModelsLoaded
             </IconButton>
           </div>
         </div>
-
-        {/* API Key */}
-        <ApiKeyCard onModelsLoaded={onModelsLoaded} onDisconnected={onDisconnected} />
 
         {/* Auto-index toggle */}
         <div className="flex items-center justify-between">
