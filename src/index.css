@@ -1,20 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Design tokens — Warm Graphite (see docs/DESIGN_SYSTEM.md).
+  Values are space-separated RGB channels so Tailwind's `<alpha-value>`
+  opacity modifiers (e.g. bg-accent/25) work. Dark is the default on :root;
+  [data-theme="light"] overrides the same names with the warm-paper set.
+*/
+:root {
+  /* graphite ramp */
+  --g-000: 11 10 10;
+  --g-050: 16 15 15;
+  --g-100: 22 21 20;
+  --g-150: 27 26 24;
+  --g-200: 33 31 29;
+  --g-250: 40 38 35;
+  --g-300: 47 45 41;
+  --g-350: 57 54 50;
+  --line:  34 32 29;
+  /* text */
+  --text:   236 233 229;
+  --text-2: 166 161 153;
+  --text-3: 112 107 99;
+  --text-4: 80 75 68;
+  /* accent (rationed green) */
+  --accent:     34 201 138;
+  --accent-dim: 23 160 109;
+  --on-accent:  6 35 26;
+  /* status */
+  --status-success: 34 201 138;
+  --status-error:   239 83 80;
+  --status-warning: 224 178 58;
+  --status-info:    83 145 240;
+  /* tools */
+  --tool-read:  83 145 240;
+  --tool-bash:  245 136 60;
+  --tool-edit:  224 178 58;
+  --tool-write: 60 192 125;
+  --tool-glob:  138 134 129;
+}
+
+:root[data-theme="light"] {
+  --g-000: 231 227 219;
+  --g-050: 247 245 241;
+  --g-100: 239 236 230;
+  --g-150: 234 231 224;
+  --g-200: 255 255 255;
+  --g-250: 233 229 221;
+  --g-300: 224 219 210;
+  --g-350: 208 202 191;
+  --line:  230 226 218;
+  --text:   42 39 36;
+  --text-2: 95 90 82;
+  --text-3: 138 132 122;
+  --text-4: 172 166 155;
+  --accent:     12 143 87;
+  --accent-dim: 10 117 72;
+  --on-accent:  255 255 255;
+  --status-success: 12 143 87;
+  --status-error:   208 66 64;
+  --status-warning: 160 119 20;
+  --status-info:    47 111 208;
+  --tool-read:  47 111 208;
+  --tool-bash:  207 106 32;
+  --tool-edit:  160 119 20;
+  --tool-write: 18 145 90;
+  --tool-glob:  122 118 112;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-mark.search-highlight {
-  background-color: #fde047;
-  color: #0f0e0d;
-  border-radius: 2px;
-  padding: 0 1px;
 }
 
 html, body, #root {
@@ -23,10 +83,34 @@ html, body, #root {
 }
 
 body {
-  background-color: #0f0e0d;
-  color: #f0ede8;
+  background-color: rgb(var(--g-050));
+  color: rgb(var(--text));
   font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+mark.search-highlight {
+  background-color: rgb(var(--accent) / 0.28);
+  color: rgb(var(--text));
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* skeleton shimmer */
+@keyframes ccct-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    rgb(var(--g-150)) 25%, rgb(var(--g-250)) 37%, rgb(var(--g-150)) 63%);
+  background-size: 400% 100%;
+  animation: ccct-shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
 }
