@@ -26,7 +26,7 @@ export default function SummaryHeader({ conversation, meta }: Props) {
 
   return (
     <div className="min-w-0">
-      {cwd && <p className="font-mono text-[10.5px] text-text-faint mb-1.5 truncate">{cwd}</p>}
+      {cwd && <p className="font-mono text-[11px] text-text-faint mb-1.5 truncate">{cwd}</p>}
 
       <div className="flex items-start gap-4">
         <h2
@@ -35,7 +35,7 @@ export default function SummaryHeader({ conversation, meta }: Props) {
         >
           {title}
         </h2>
-        <div className="flex-shrink-0 flex items-center gap-2 font-mono text-[10.5px] text-text-muted pt-0.5">
+        <div className="flex-shrink-0 flex items-center gap-2 font-mono text-[11px] text-text-muted pt-0.5">
           {meta.model && <span>{meta.model}</span>}
           <span className="text-text-faint">·</span>
           <span className="tabular-nums">{meta.messageCount} msgs</span>
@@ -56,14 +56,14 @@ export default function SummaryHeader({ conversation, meta }: Props) {
             <span
               key={f.path}
               title={f.path}
-              className="inline-flex items-center gap-1.5 font-mono text-[10.5px] text-text-secondary bg-surface-raised border border-surface-border-strong rounded-md px-2 py-[3px]"
+              className="inline-flex items-center gap-1.5 font-mono text-[11px] text-text-secondary bg-surface-raised border border-surface-border-strong rounded-md px-2 py-[3px]"
             >
               <span className={`w-1.5 h-1.5 rounded-sm flex-shrink-0 ${dotClass[f.kind]}`} />
               {f.name}
             </span>
           ))}
           {meta.files.length > 8 && (
-            <span className="self-center font-mono text-[10.5px] text-text-faint">+{meta.files.length - 8} more</span>
+            <span className="self-center font-mono text-[11px] text-text-faint">+{meta.files.length - 8} more</span>
           )}
         </div>
       )}

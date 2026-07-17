@@ -256,7 +256,7 @@ export default function Sidebar({ projects, selectedConversationId, onSelectConv
                         : 'border-transparent text-text-secondary'
                       }`}
                   >
-                    <span className="truncate text-xs"><Highlight text={indexEntry?.firstMessage || conversation.filename} query={query} /></span>
+                    <span className="truncate text-[13px] font-medium"><Highlight text={indexEntry?.firstMessage || conversation.filename} query={query} /></span>
                     <span className="text-xs text-text-muted">{indexEntry?.date ? formatRelativeDate(indexEntry.date) : null}</span>
                   </button>
                 );
