@@ -9,13 +9,18 @@ type AssistantMessageProps = {
   text?: string,
   thinkingBlocks: ThinkingBlockType[],
   toolCalls: ToolCall[],
-  cwd?: string
+  cwd?: string,
+  showThinking?: boolean,
+  showTools?: boolean
 }
 
-export default function AssistantMessage({ text, thinkingBlocks, toolCalls, cwd } : AssistantMessageProps) {
+export default function AssistantMessage({ text, thinkingBlocks, toolCalls, cwd, showThinking = true, showTools = true } : AssistantMessageProps) {
   return(
     <div className="border-l-2 border-surface-border pl-4 flex flex-col gap-2">
-      <p className="text-xs text-text-muted mb-1">Claude</p>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="grid place-items-center w-[18px] h-[18px] rounded-[5px] bg-surface-border-strong border border-surface-emphasis text-[10px] font-extrabold text-text-primary">C</span>
+        <span className="text-xs text-text-muted">Claude</span>
+      </div>
       {text && (
         <div className="prose prose-invert prose-sm max-w-none prose-code:before:content-none prose-code:after:content-none prose-code:bg-surface-overlay prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
           <ReactMarkdown
@@ -40,10 +45,10 @@ export default function AssistantMessage({ text, thinkingBlocks, toolCalls, cwd 
           >{text}</ReactMarkdown>
         </div>
       )}
-      {thinkingBlocks.map((thinkingBlock, i) => (
+      {showThinking && thinkingBlocks.map((thinkingBlock, i) => (
         <ThinkingBlock key={i} text={thinkingBlock.text}/>
       ))}
-      {toolCalls.map((toolCall, i) => (
+      {showTools && toolCalls.map((toolCall, i) => (
         <ToolCallCard key={i} toolCall={toolCall} cwd={cwd}/>
       ))}
     </div>

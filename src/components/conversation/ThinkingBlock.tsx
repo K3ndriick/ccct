@@ -9,11 +9,11 @@ export default function ThinkingBlock({ text } : ThinkingBlockProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="bg-accent-subtle border-l-2 border-accent-dim rounded-r px-3 py-2">
+    <div className="bg-surface-header border border-surface-border rounded-lg px-3 py-2">
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-accent-dim w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+        className="flex items-center gap-2 cursor-pointer text-xs font-medium text-text-muted w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
       >
         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         Thinking
