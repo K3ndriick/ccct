@@ -1,21 +1,46 @@
-import { Settings, Minus, Square, X } from "lucide-react";
+import { useState } from "react";
+import { Settings, Minus, Square, X, Sun, Moon, Search } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getTheme, toggleTheme, type Theme } from "../lib/theme";
+import { modKey } from "../lib/platform";
 
 type TopBarProps = {
-  onSettingsClick: () => void
-}
+  onSettingsClick: () => void;
+  onOpenPalette: () => void;
+};
 
-export default function TopBar({ onSettingsClick }: TopBarProps) {
+export default function TopBar({ onSettingsClick, onOpenPalette }: TopBarProps) {
   const win = getCurrentWindow();
+  const [theme, setTheme] = useState<Theme>(getTheme());
 
   return (
     <div
       data-tauri-drag-region
-      className="flex items-center justify-between px-4 border-b border-surface-border select-none h-10 flex-shrink-0"
+      className="flex items-center justify-between px-4 border-b border-surface-border select-none h-10 flex-shrink-0 bg-surface-header"
     >
-      <h1 data-tauri-drag-region className="text-sm font-semibold text-text-primary">CCCT</h1>
+      <h1 data-tauri-drag-region className="text-sm font-semibold text-text-primary">
+        CCCT
+      </h1>
 
       <div className="flex items-center gap-1">
+        <button
+          className="flex items-center gap-2 text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md px-2 py-1 border border-surface-border-strong hover:bg-surface-overlay text-xs"
+          onClick={onOpenPalette}
+          aria-label="Search everything"
+        >
+          <Search size={13} />
+          <span className="hidden sm:inline">Search</span>
+          <kbd className="font-mono text-[10px] text-text-faint">{modKey("K")}</kbd>
+        </button>
+
+        <button
+          className="text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded p-1.5 hover:bg-surface-overlay"
+          onClick={() => setTheme(toggleTheme())}
+          aria-label="Toggle light or dark theme"
+        >
+          {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
+        </button>
+
         <button
           className="text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded p-1"
           onClick={onSettingsClick}
@@ -50,5 +75,5 @@ export default function TopBar({ onSettingsClick }: TopBarProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
